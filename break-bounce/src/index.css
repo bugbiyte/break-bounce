@@ -7,12 +7,12 @@
   --accent: #aa3bff;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --social-bg: rgba(229, 74, 8, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -108,4 +108,14 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
 }
