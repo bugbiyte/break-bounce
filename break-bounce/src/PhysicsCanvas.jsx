@@ -1,15 +1,17 @@
 import { useEffect, useRef } from "react";
 import Matter from "matter-js";
 
-const COUNT = 15;
+const COUNT = 20;
+const EMOJI_SIZE = 82;
+const HALF = EMOJI_SIZE / 2;
 
 function PhysicsCanvas({ creatures }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const { Engine, Runner, Bodies, Composite, Events } = Matter;
+    const { Engine, Runner, Bodies, Composite } = Matter;
 
-    const engine = Engine.create({ gravity: { y: 0 } });
+    const engine = Engine.create({ gravity: { y: 0 }, enableSleeping: false });
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -24,22 +26,23 @@ function PhysicsCanvas({ creatures }) {
       Bodies.circle(
         Math.random() * (width - 100) + 50,
         Math.random() * (height - 100) + 50,
-        30,
+        HALF,
         {
           restitution: 1,
           friction: 0,
           frictionAir: 0,
           label: creatures[i % creatures.length],
-        }
-      )
+        },
+      ),
     );
 
     Composite.add(engine.world, [...walls, ...bodies]);
-
     bodies.forEach((body) => {
+      const vx = (Math.random() - 0.5) * 10;
+      const vy = (Math.random() - 0.5) * 10;
       Matter.Body.setVelocity(body, {
-        x: (Math.random() - 0.5) * 10,
-        y: (Math.random() - 0.5) * 10,
+        x: Math.abs(vx) < 2 ? (vx < 0 ? -2 : 2) : vx,
+        y: Math.abs(vy) < 2 ? (vy < 0 ? -2 : 2) : vy,
       });
     });
 
@@ -47,9 +50,11 @@ function PhysicsCanvas({ creatures }) {
       const el = document.createElement("div");
       el.textContent = body.label;
       el.style.position = "absolute";
-      el.style.fontSize = "48px";
+      el.style.fontSize = EMOJI_SIZE + "px";
       el.style.userSelect = "none";
       el.style.pointerEvents = "none";
+      el.style.left = body.position.x - HALF + "px";
+      el.style.top = body.position.y - HALF + "px";
       containerRef.current.appendChild(el);
       return el;
     });
@@ -57,16 +62,29 @@ function PhysicsCanvas({ creatures }) {
     const runner = Runner.create();
     Runner.run(runner, engine);
 
-    Events.on(engine, "afterUpdate", () => {
+    let animationId;
+    function update() {
       bodies.forEach((body, i) => {
+        const { x, y } = body.velocity;
+        const speed = Math.sqrt(x * x + y * y);
+        if (speed < 1.5) {
+          const angle = Math.random() * Math.PI * 2;
+          Matter.Body.setVelocity(body, {
+            x: Math.cos(angle) * 3,
+            y: Math.sin(angle) * 3,
+          });
+        }
         const el = elements[i];
-        el.style.left = body.position.x - 24 + "px";
-        el.style.top = body.position.y - 24 + "px";
+        el.style.left = body.position.x - HALF + "px";
+        el.style.top = body.position.y - HALF + "px";
         el.style.transform = `rotate(${body.angle}rad)`;
       });
-    });
+      animationId = requestAnimationFrame(update);
+    }
+    update();
 
     return () => {
+      cancelAnimationFrame(animationId);
       Runner.stop(runner);
       Engine.clear(engine);
       if (containerRef.current) containerRef.current.innerHTML = "";
