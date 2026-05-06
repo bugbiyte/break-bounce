@@ -742,7 +742,7 @@ function App() {
     overlayActiveRef.current = true;
     const random = COMMANDS[Math.floor(Math.random() * COMMANDS.length)];
     setCommand(random);
-    setSecondsLeft(30);
+    setSecondsLeft(60);
     setDone(false);
     setAccepted(false);
     setShowOverlay(true);

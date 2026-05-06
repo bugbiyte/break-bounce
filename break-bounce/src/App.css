@@ -728,6 +728,7 @@ body {
 
 .reward-cat-wrap {
   width: min(580px, 88vw);
+  max-height: 320px;
   background: #03050d;
   border: 1px solid #1a4a6a;
   box-shadow: 0 0 40px #4fc8e822;
@@ -737,7 +738,8 @@ body {
 
 .reward-cat {
   width: 100%;
-  height: auto;
+  height: 320px;
+  object-fit: contain;
   display: block;
 }
 
