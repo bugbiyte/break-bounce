@@ -7,18 +7,6 @@ const THEMES = {
     name: "Creatures of the purr",
     creatures: ["🐱", "🐈", "🐈‍⬛", "🙀", "𓃭", "🐾", "🐆", "𓃮", "🐆", "𓃠"],
   },
-  spooky: {
-    name: "Skulls & Spooky",
-    creatures: ["💀", "👻", "🦇", "🕷️ ", "☠️ ", "🫀", "🩸", "🕸️ "],
-  },
-  goblins: {
-    name: "Goblins",
-    creatures: ["👺", "😈", "👿", "🔥", "🤬", "💢", "🧿", "⚡"],
-  },
-  vibes: {
-    name: "Vibes",
-    creatures: ["🌈", "✨", "🪩", "💫", "⭐", "🎉", "🦋", "🌀"],
-  },
   cursed: {
     name: "Cursed",
     creatures: ["🤡", "👁️ ", "🦷", "🧿", "🫁", "🩸", "🕯️ ", "🪦"],

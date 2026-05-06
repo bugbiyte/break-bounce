@@ -369,8 +369,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
   padding-top: 60px;
+  padding-bottom: 20px;
   text-align: center;
 }
 
@@ -1146,5 +1149,77 @@ body {
   .tally-tab {
     font-size: 0.75rem;
     gap: 6px;
+  }
+}
+
+/* ── HEIGHT-BASED QUERIES — prevents bottom cutoff on short screens ── */
+@media (max-height: 900px) {
+  .waiting {
+    gap: 12px;
+    justify-content: flex-start;
+    padding-top: 80px;
+    padding-bottom: 48px;
+  }
+
+  .zelda-box {
+    padding: 24px 40px;
+  }
+
+  .zelda-divider {
+    margin: 8px 0;
+  }
+
+  .theme-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .theme-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .theme-btn-emojis {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .waiting {
+    gap: 8px;
+    padding-top: 72px;
+    padding-bottom: 40px;
+  }
+
+  .zelda-box {
+    padding: 16px 28px;
+  }
+
+  .zelda-box h2 {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+  }
+
+  .zelda-box p {
+    font-size: 0.82rem;
+  }
+
+  .zelda-divider {
+    margin: 6px 0;
+  }
+
+  .theme-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .appease-btn {
+    padding: 10px 24px;
+    font-size: 0.85rem;
+  }
+
+  .app-footer {
+    display: none;
   }
 }
