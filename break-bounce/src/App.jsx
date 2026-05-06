@@ -178,9 +178,23 @@ const COMMANDS = [
   },
 ];
 
+const SHAME_MESSAGES = [
+  { title: "COWARD.", subtitle: "The goblin has recorded your weakness in the ancient ledger. It will not forget." },
+  { title: "Pathetic.", subtitle: "Even the chair is disappointed. The chair has more spine than you." },
+  { title: "The goblin weeps.", subtitle: "Not for you. For itself. To be denied by such a feeble excuse for a mortal." },
+  { title: "Noted.", subtitle: "Your name has been added to the Wall of Shame. It is a very long wall. You fit right in." },
+  { title: "I see.", subtitle: "I see exactly who you are. The goblin also sees. We all see. Goodbye." },
+  { title: "Fine.", subtitle: "Just sit there. Become one with the chair. Let it consume you slowly. This is what you chose." },
+  { title: "The ancient law is broken.", subtitle: "Somewhere, a goblin is crying. Are you proud of yourself? Think about it." },
+  { title: "A true goblin never forgets.", subtitle: "Your cowardice has been documented. In ink. Made of shame. Signed by you." },
+  { title: "Incredible. Truly.", subtitle: "In all my years haunting desk workers, I have never seen such a spectacular refusal to try." },
+  { title: "The prophecy was wrong.", subtitle: "It said a champion would rise. It did not account for you specifically." },
+];
+
 let currentCtx = null;
 
-async function playAlarm() {
+async function playAlarm(muted) {
+  if (muted) return;
   if (currentCtx) currentCtx.close();
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   currentCtx = ctx;
@@ -208,7 +222,8 @@ function stopAlarm() {
   }
 }
 
-function playDismissSound() {
+function playDismissSound(muted) {
+  if (muted) return;
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const notes = [523, 659, 784, 1047];
   notes.forEach((freq, i) => {
@@ -307,7 +322,7 @@ function Particles() {
   );
 }
 
-function Header({ tally, onSettings, onHistory }) {
+function Header({ tally, onSettings, onHistory, muted, onMute }) {
   return (
     <div className="header">
       <div className="header-title-wrap">
@@ -332,6 +347,7 @@ function Header({ tally, onSettings, onHistory }) {
         </span>
       </div>
       <div className="header-btns">
+        <button className="settings-btn" onClick={onMute} title={muted ? "Unmute" : "Mute"}>{muted ? "🔇" : "🔊"}</button>
         <button className="settings-btn" onClick={onHistory}>📜</button>
         <button className="settings-btn" onClick={onSettings}>🕰️</button>
       </div>
@@ -556,6 +572,8 @@ function App() {
   const [accepted, setAccepted] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [done, setDone] = useState(false);
+  const [shamed, setShamed] = useState(false);
+  const [shameMsg, setShameMsg] = useState(null);
   const [command, setCommand] = useState(COMMANDS[0]);
   const [themeKey, setThemeKey] = useState(() => getSavedThemeKey());
   const theme = THEMES[themeKey];
@@ -563,9 +581,20 @@ function App() {
   const [tally, setTally] = useState(() => getSavedTally());
   const [streak, setStreak] = useState(() => getSavedStreak());
   const [history, setHistory] = useState(() => getSavedHistory());
+  const [muted, setMuted] = useState(() => localStorage.getItem("breakBounceMuted") === "true");
+  const [paused, setPaused] = useState(false);
+  const mutedRef = useRef(muted);
   const alarmRef = useRef(null);
   const overlayActiveRef = useRef(false);
   const breakTimerRef = useRef(null);
+
+  function toggleMute() {
+    const newMuted = !muted;
+    setMuted(newMuted);
+    mutedRef.current = newMuted;
+    localStorage.setItem("breakBounceMuted", newMuted);
+    if (newMuted) stopAlarm();
+  }
 
   function triggerGoblin() {
     overlayActiveRef.current = true;
@@ -591,8 +620,8 @@ function App() {
 
   useEffect(() => {
     if (!showOverlay) return;
-    playAlarm();
-    alarmRef.current = setInterval(playAlarm, 5000);
+    playAlarm(mutedRef.current);
+    alarmRef.current = setInterval(() => playAlarm(mutedRef.current), 5000);
     return () => {
       clearInterval(alarmRef.current);
       stopAlarm();
@@ -616,7 +645,7 @@ function App() {
   }
 
   function dismiss() {
-    playDismissSound();
+    playDismissSound(mutedRef.current);
     const newTally = tally + 1;
 
     const entry = {
@@ -641,6 +670,24 @@ function App() {
     setAccepted(false);
   }
 
+  function skip() {
+    clearInterval(alarmRef.current);
+    stopAlarm();
+    const msg = SHAME_MESSAGES[Math.floor(Math.random() * SHAME_MESSAGES.length)];
+    setShameMsg(msg);
+    setShamed(true);
+  }
+
+  function dismissShame() {
+    overlayActiveRef.current = false;
+    setShowOverlay(false);
+    setAccepted(false);
+    setShamed(false);
+    setShameMsg(null);
+    clearInterval(breakTimerRef.current);
+    setPaused(true);
+  }
+
   function saveInterval(ms) {
     localStorage.setItem("breakBounceInterval", ms);
     setIntervalValue(ms);
@@ -650,6 +697,10 @@ function App() {
   function saveTheme(key) {
     localStorage.setItem("breakBounceThemeKey", key);
     setThemeKey(key);
+    if (paused) {
+      setPaused(false);
+      startBreakTimer(interval);
+    }
   }
 
   function resetTally() {
@@ -693,7 +744,7 @@ function App() {
     return (
       <div className="settings-panel">
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} />
+        <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} />
         <h2>⚙️ Settings</h2>
         <p>How often should the goblin appear?</p>
         <div className="interval-options">
@@ -719,7 +770,7 @@ function App() {
     return (
       <div className="settings-panel">
         <GigerBottom />
-        <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} />
+        <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} muted={muted} onMute={toggleMute} />
         <h2>📜 The Chronicle</h2>
         {streak.count > 0 && (
           <p className="streak-display">🔥 {streak.count} day streak</p>
@@ -751,15 +802,18 @@ function App() {
       <div className="waiting">
         <Particles />
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} />
+        <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} muted={muted} onMute={toggleMute} />
         <div className="zelda-box">
           <h2>Break Bounce</h2>
           {streak.count > 0 && (
             <p className="streak-display">🔥 {streak.count} day streak</p>
           )}
           <div className="zelda-divider" />
-          <p>Choose your theme:</p>
-          <div className="theme-options">
+          <p>Choose your theme{paused ? ":" : ":"}</p>
+          {paused && (
+            <p className="resume-nudge">👺 The goblin waits. Select any theme to resume.</p>
+          )}
+          <div className={`theme-options${paused ? " theme-options-nudge" : ""}`}>
             {Object.entries(THEMES).map(([key, t]) => (
               <button
                 key={key}
@@ -792,30 +846,53 @@ function App() {
   }
 
   return (
-    <div className="overlay">
+    <div className={`overlay${shamed ? " shame-overlay" : ""}`}>
       <Particles />
       <GigerBottom />
       <PhysicsCanvas creatures={theme.creatures} />
-      <p className="session-progress">🚩 Session {tally + 1} of {TALLY_GOAL} 🚩</p>
+      {!shamed && <p className="session-progress">🚩 Session {tally + 1} of {TALLY_GOAL} 🚩</p>}
       <div className="content">
-        <div className="command-scroll">
-          <span className="scroll-corner-tl" />
-          <span className="scroll-corner-tr" />
-          <span className="scroll-corner-bl" />
-          <span className="scroll-corner-br" />
-          <h1 className="command">{command.title}</h1>
-          <p className="subtext">{command.subtitle}</p>
-        </div>
-        {!accepted ? (
-          <button className="appease-btn" onClick={accept}>
-            Okay, I accept 🔔
-          </button>
-        ) : !done ? (
-          <div className={`countdown${secondsLeft <= 5 ? " critical" : secondsLeft <= 10 ? " low" : ""}`}>{secondsLeft}</div>
+        {shamed ? (
+          <>
+            <div className="command-scroll shame-scroll">
+              <span className="scroll-corner-tl" />
+              <span className="scroll-corner-tr" />
+              <span className="scroll-corner-bl" />
+              <span className="scroll-corner-br" />
+              <h1 className="command shame-command">{shameMsg.title}</h1>
+              <p className="subtext">{shameMsg.subtitle}</p>
+            </div>
+            <button className="appease-btn shame-btn" onClick={dismissShame}>
+              I accept my shame 🙇
+            </button>
+          </>
         ) : (
-          <button className="appease-btn" onClick={dismiss}>
-            I have appeased the goblin 👺
-          </button>
+          <>
+            <div className="command-scroll">
+              <span className="scroll-corner-tl" />
+              <span className="scroll-corner-tr" />
+              <span className="scroll-corner-bl" />
+              <span className="scroll-corner-br" />
+              <h1 className="command">{command.title}</h1>
+              <p className="subtext">{command.subtitle}</p>
+            </div>
+            {!accepted ? (
+              <div className="overlay-actions">
+                <button className="appease-btn" onClick={accept}>
+                  Okay, I accept 🔔
+                </button>
+                <button className="skip-btn" onClick={skip}>
+                  I cannot accept 🏳️
+                </button>
+              </div>
+            ) : !done ? (
+              <div className={`countdown${secondsLeft <= 5 ? " critical" : secondsLeft <= 10 ? " low" : ""}`}>{secondsLeft}</div>
+            ) : (
+              <button className="appease-btn" onClick={dismiss}>
+                I have appeased the goblin 👺
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
