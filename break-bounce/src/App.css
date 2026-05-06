@@ -866,6 +866,25 @@ body {
   margin-top: 16px;
 }
 
+/* ── NEXT BREAK COUNTDOWN ── */
+.next-break-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: #4fc8e877;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.next-break-countdown {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2.4rem;
+  color: #4fc8e8;
+  text-shadow: 0 0 20px #4fc8e855;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
 /* ── RULES PANEL ── */
 .rules-list {
   display: flex;

@@ -72,6 +72,13 @@ function computeNewStreak(current) {
   return { count: newCount, lastCompleteDate: today };
 }
 
+function formatTimeLeft(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
 function groupByDate(history) {
   const map = {};
   history.forEach((e) => {
@@ -707,6 +714,8 @@ function App() {
   const alarmRef = useRef(null);
   const overlayActiveRef = useRef(false);
   const breakTimerRef = useRef(null);
+  const timerStartRef = useRef(Date.now());
+  const [timeLeft, setTimeLeft] = useState(() => getSavedInterval());
 
   const REWARD_CATS = [
     "/creatures/cat01.png",
@@ -741,6 +750,8 @@ function App() {
 
   function startBreakTimer(ms) {
     clearInterval(breakTimerRef.current);
+    timerStartRef.current = Date.now();
+    setTimeLeft(ms);
     breakTimerRef.current = setInterval(() => {
       if (!overlayActiveRef.current) triggerGoblin();
     }, ms);
@@ -750,6 +761,16 @@ function App() {
     startBreakTimer(interval);
     return () => clearInterval(breakTimerRef.current);
   }, [interval]);
+
+  useEffect(() => {
+    const tick = setInterval(() => {
+      if (!overlayActiveRef.current && !paused) {
+        const elapsed = Date.now() - timerStartRef.current;
+        setTimeLeft(Math.max(0, interval - elapsed));
+      }
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [interval, paused]);
 
   useEffect(() => {
     if (!showOverlay) return;
@@ -801,6 +822,7 @@ function App() {
     overlayActiveRef.current = false;
     setShowOverlay(false);
     setAccepted(false);
+    startBreakTimer(interval);
   }
 
   function skip() {
@@ -1008,7 +1030,8 @@ function App() {
               </span>
           </p>
           <div className="zelda-divider" />
-          <p>A goblin approaches...</p>
+          <p className="next-break-label">Goblin arrives in</p>
+          <p className="next-break-countdown">{formatTimeLeft(timeLeft)}</p>
           <br />
           <button className="appease-btn" onClick={triggerGoblin}>
             ⚔️ Summon the Goblin
