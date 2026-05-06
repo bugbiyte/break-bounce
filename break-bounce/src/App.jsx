@@ -959,7 +959,7 @@ function App() {
       <div className="settings-panel">
         <GigerBottom />
         <Header tally={tally} onSettings={() => { setShowRules(false); setShowSettings(true); }} onHistory={() => { setShowRules(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(false)} />
-        <h2>📖 The Pact</h2>
+        <h2>📖 The Rules</h2>
         <div className="rules-list">
           <div className="rules-item">
             <span className="rules-icon">⏰</span>
