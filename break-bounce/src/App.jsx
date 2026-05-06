@@ -642,7 +642,7 @@ function SplashScreen({ onEnter }) {
           <>
             <div className="splash-choose-prompt">
               <p className="splash-welcome-title">Welcome to Break Bounce</p>
-              <p className="splash-who-title">Who Approaches the Pact?</p>
+              <p className="splash-who-title">Who Approaches?</p>
             </div>
             <div className="splash-cat-choice">
               <button className="splash-cat-option" onClick={() => setChoice("new")}>
