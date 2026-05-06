@@ -57,7 +57,7 @@ function getSavedThemeKey() {
 
 function getSavedInterval() {
   const saved = localStorage.getItem("breakBounceInterval");
-  return saved ? parseInt(saved) : 45 * 60 * 1000;
+  return saved ? parseInt(saved) : 60 * 60 * 1000;
 }
 
 function getSavedTally() {
@@ -322,16 +322,11 @@ function Particles() {
   );
 }
 
-function Header({ tally, onSettings, onHistory, muted, onMute }) {
+function Header({ tally, onSettings, onHistory, muted, onMute, onLogoClick, onRules }) {
   return (
     <div className="header">
       <div className="header-title-wrap">
-        <span className="header-title">⚔️ Break Bounce</span>
-        <div className="header-about">
-          A web app that fires off an alarm and drags you into a "Break Bounce"
-          session. <br /> Survive five in a day and the Goblin (your alarm)
-          finally backs off—leaving you with silence and a farewell photo.
-        </div>
+        <span className="header-title" onClick={onLogoClick}>⚔️ Break Bounce</span>
       </div>
       <div className="tally-tab">
         <span>Tally:</span>
@@ -348,6 +343,7 @@ function Header({ tally, onSettings, onHistory, muted, onMute }) {
       </div>
       <div className="header-btns">
         <button className="settings-btn" onClick={onMute} title={muted ? "Unmute" : "Mute"}>{muted ? "🔇" : "🔊"}</button>
+        <button className="settings-btn" onClick={onRules} title="The Pact — Rules">📖</button>
         <button className="settings-btn" onClick={onHistory}>📜</button>
         <button className="settings-btn" onClick={onSettings}>🕰️</button>
       </div>
@@ -565,7 +561,143 @@ function GigerBottom() {
   );
 }
 
+const SPLASH_TEXT = "Pssst. Yeah, you. The one glued to the chair. I am Break Bounce. A sassy goblin who will remind you to take breaks. Complete 5 sessions and I shall leave you in peace...for today.";
+
+let _splashSeen = false;
+
+function SplashScreen({ onEnter }) {
+  const [choice, setChoice] = useState(null); // null | "new" | "familiar"
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (choice !== "new") return;
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < SPLASH_TEXT.length) {
+        setDisplayed(SPLASH_TEXT.slice(0, i + 1));
+        i++;
+      } else {
+        setDone(true);
+        clearInterval(timer);
+      }
+    }, 38);
+    return () => clearInterval(timer);
+  }, [choice]);
+
+  useEffect(() => {
+    if (choice === "familiar") onEnter();
+  }, [choice]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const CELL = 44;
+    const cols = Math.ceil(canvas.width / CELL) + 1;
+    const rows = Math.ceil(canvas.height / CELL) + 1;
+    ctx.fillStyle = "#03050d";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = c * CELL;
+        const y = r * CELL;
+        ctx.fillStyle = r % 2 === c % 2 ? "#040a12" : "#03070f";
+        ctx.fillRect(x, y, CELL, CELL);
+        ctx.strokeStyle = "#1a4a6a55";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, CELL, CELL);
+        if (Math.random() > 0.65) {
+          ctx.strokeStyle = "#1a4a6a99";
+          ctx.lineWidth = 2;
+          const side = Math.floor(Math.random() * 4);
+          ctx.beginPath();
+          if (side === 0) { ctx.moveTo(x, y); ctx.lineTo(x + CELL, y); }
+          else if (side === 1) { ctx.moveTo(x + CELL, y); ctx.lineTo(x + CELL, y + CELL); }
+          else if (side === 2) { ctx.moveTo(x, y + CELL); ctx.lineTo(x + CELL, y + CELL); }
+          else { ctx.moveTo(x, y); ctx.lineTo(x, y + CELL); }
+          ctx.stroke();
+        }
+      }
+    }
+    for (let i = 0; i < 12; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, 60);
+      grad.addColorStop(0, "#4fc8e814");
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.fillRect(x - 60, y - 60, 120, 120);
+    }
+  }, []);
+
+  return (
+    <div className="splash-screen">
+      <canvas ref={canvasRef} className="splash-canvas" />
+      <div className="splash-content">
+        {choice === null ? (
+          <>
+            <div className="splash-choose-prompt">
+              <p className="splash-welcome-title">Welcome to Break Bounce</p>
+              <p className="splash-who-title">Who Approaches the Pact?</p>
+            </div>
+            <div className="splash-cat-choice">
+              <button className="splash-cat-option" onClick={() => setChoice("new")}>
+                <img src="/creatures/cat04.png" className="splash-cat" alt="Fresh Prey" />
+                <span className="splash-cat-label">Fresh Prey</span>
+                <span className="splash-cat-sublabel">First time here</span>
+              </button>
+              <button className="splash-cat-option" onClick={() => setChoice("familiar")}>
+                <img src="/creatures/cat03.png" className="splash-cat" alt="Veteran of the Chair" />
+                <span className="splash-cat-label">Veteran of the Chair</span>
+                <span className="splash-cat-sublabel">I know the rules</span>
+              </button>
+            </div>
+            <p className="splash-tab-note">⚔️ Keep this tab open while you work — the goblin needs to watch you.</p>
+          </>
+        ) : choice === "new" ? (
+          <>
+            <div className="splash-bubble-wrap">
+              <div className="splash-speech-bubble">
+                <p className="splash-text">
+                  {displayed}
+                  <span className={`splash-cursor${done ? " blink" : ""}`}>▌</span>
+                </p>
+              </div>
+            </div>
+            <div className="splash-cat-wrap">
+              <img src="/creatures/cat04.png" className="splash-cat" alt="Break Bounce mascot" />
+            </div>
+            {done && (
+              <div className="splash-enter-wrap">
+                <button className="appease-btn" onClick={onEnter}>
+                  I accept the pact ⚔️
+                </button>
+              </div>
+            )}
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function Footer() {
+  return (
+    <div className="app-footer">
+      Created by Anngie & Claude ✦
+    </div>
+  );
+}
+
+
 function App() {
+  const [showSplash, setShowSplash] = useState(!_splashSeen);
+
+  const [showRules, setShowRules] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -587,6 +719,19 @@ function App() {
   const alarmRef = useRef(null);
   const overlayActiveRef = useRef(false);
   const breakTimerRef = useRef(null);
+
+  const REWARD_CATS = [
+    "/creatures/cat01.png",
+    "/creatures/cat02.png",
+    "/creatures/cat03.png",
+    "/creatures/cat04.png",
+    "/creatures/cat05.png",
+    "/creatures/cat06.png",
+    "/creatures/cat07.png",
+  ];
+  const [rewardCat] = useState(
+    () => REWARD_CATS[Math.floor(Math.random() * REWARD_CATS.length)],
+  );
 
   function toggleMute() {
     const newMuted = !muted;
@@ -708,18 +853,17 @@ function App() {
     localStorage.setItem("breakBounceTally", 0);
   }
 
-  const REWARD_CATS = [
-    "/creatures/cat01.png",
-    "/creatures/cat02.png",
-    "/creatures/cat03.png",
-    "/creatures/cat04.png",
-    "/creatures/cat05.png",
-    "/creatures/cat06.png",
-    "/creatures/cat07.png",
-  ];
-  const [rewardCat] = useState(
-    () => REWARD_CATS[Math.floor(Math.random() * REWARD_CATS.length)],
-  );
+  function goToSplash() {
+    _splashSeen = false;
+    setShowSplash(true);
+  }
+
+  function enterApp() {
+    _splashSeen = true;
+    setShowSplash(false);
+  }
+
+  if (showSplash) return <SplashScreen onEnter={enterApp} />;
 
   if (tally >= TALLY_GOAL) {
     return (
@@ -736,6 +880,7 @@ function App() {
         <button className="appease-btn" onClick={resetTally}>
           Begin a new pact 👺
         </button>
+        <Footer />
       </div>
     );
   }
@@ -744,7 +889,7 @@ function App() {
     return (
       <div className="settings-panel">
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} />
+        <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => { setShowSettings(false); setShowRules(true); }} />
         <h2>⚙️ Settings</h2>
         <p>How often should the goblin appear?</p>
         <div className="interval-options">
@@ -761,6 +906,7 @@ function App() {
         <button className="appease-btn" onClick={() => setShowSettings(false)}>
           ← Back
         </button>
+        <Footer />
       </div>
     );
   }
@@ -770,7 +916,7 @@ function App() {
     return (
       <div className="settings-panel">
         <GigerBottom />
-        <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} muted={muted} onMute={toggleMute} />
+        <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => { setShowHistory(false); setShowRules(true); }} />
         <h2>📜 The Chronicle</h2>
         {streak.count > 0 && (
           <p className="streak-display">🔥 {streak.count} day streak</p>
@@ -793,6 +939,41 @@ function App() {
           )}
         </div>
         <button className="appease-btn" onClick={() => setShowHistory(false)}>← Back</button>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (showRules) {
+    return (
+      <div className="settings-panel">
+        <GigerBottom />
+        <Header tally={tally} onSettings={() => { setShowRules(false); setShowSettings(true); }} onHistory={() => { setShowRules(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(false)} />
+        <h2>📖 The Pact</h2>
+        <div className="rules-list">
+          <div className="rules-item">
+            <span className="rules-icon">⏰</span>
+            <p>The goblin appears at your chosen interval — 15, 30, 45, or 60 minutes.</p>
+          </div>
+          <div className="rules-item">
+            <span className="rules-icon">⚔️</span>
+            <p>When summoned, accept the challenge and complete a 30-second movement break.</p>
+          </div>
+          <div className="rules-item">
+            <span className="rules-icon">❤️</span>
+            <p>Complete 5 sessions in a day to satisfy the goblin and earn your peace.</p>
+          </div>
+          <div className="rules-item">
+            <span className="rules-icon">🏳️</span>
+            <p>You may skip — but the goblin remembers. Shame awaits the weak.</p>
+          </div>
+          <div className="rules-item">
+            <span className="rules-icon">🖥️</span>
+            <p>Keep this tab open while you work. The timer runs in the background and will not fire if the tab is closed.</p>
+          </div>
+        </div>
+        <button className="appease-btn" onClick={() => setShowRules(false)}>← Back</button>
+        <Footer />
       </div>
     );
   }
@@ -802,7 +983,7 @@ function App() {
       <div className="waiting">
         <Particles />
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} muted={muted} onMute={toggleMute} />
+        <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(true)} />
         <div className="zelda-box">
           <h2>Break Bounce</h2>
           {streak.count > 0 && (
@@ -833,6 +1014,10 @@ function App() {
             <strong>
               {INTERVALS.find((i) => i.value === interval)?.label}
             </strong>
+            <span className="break-info-tip">
+                ⓘ
+                <span className="break-info-popup">You can change your time interval in clock settings at the top right.</span>
+              </span>
           </p>
           <div className="zelda-divider" />
           <p>A goblin approaches...</p>
@@ -841,6 +1026,7 @@ function App() {
             ⚔️ Summon the Goblin
           </button>
         </div>
+        <Footer />
       </div>
     );
   }

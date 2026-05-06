@@ -205,7 +205,12 @@ body {
   color: #4fc8e8;
   letter-spacing: 3px;
   text-shadow: 0 0 16px #4fc8e888;
-  cursor: default;
+  cursor: pointer;
+  transition: text-shadow 0.2s;
+}
+
+.header-title:hover {
+  text-shadow: 0 0 24px #4fc8e8cc;
 }
 
 .header-title-wrap {
@@ -760,6 +765,289 @@ body {
 }
 
 /* ── SKIP / SHAME ── */
+
+/* ── FOOTER ── */
+.app-footer {
+  position: fixed;
+  bottom: 12px;
+  right: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  color: #cc2222aa;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  z-index: 5;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ── SPLASH SCREEN ── */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.splash-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.splash-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  padding: 40px 20px;
+}
+
+.splash-bubble-wrap {
+  position: relative;
+  width: min(500px, 88vw);
+  margin-bottom: 8px;
+}
+
+.splash-speech-bubble {
+  background: #03050dee;
+  border: 1px solid #4fc8e8;
+  border-radius: 8px;
+  padding: 20px 28px;
+  box-shadow: 0 0 30px #4fc8e822;
+  position: relative;
+}
+
+.splash-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 14px 10px 0 10px;
+  border-style: solid;
+  border-color: #4fc8e8 transparent transparent transparent;
+}
+
+.splash-speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 13px 9px 0 9px;
+  border-style: solid;
+  border-color: #03050dee transparent transparent transparent;
+  z-index: 1;
+}
+
+.splash-cat-wrap {
+  position: relative;
+  width: min(420px, 80vw);
+}
+
+.splash-cat {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px #4fc8e833);
+}
+
+.splash-enter-wrap {
+  margin-top: 16px;
+}
+
+/* ── RULES PANEL ── */
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+  width: 90%;
+  text-align: left;
+}
+
+.rules-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #1a4a6a33;
+  background: #03050daa;
+}
+
+.rules-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rules-item p {
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+  color: #c8e8f5;
+  letter-spacing: 0.5px;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ── SPLASH TAB NOTE ── */
+.splash-tab-note {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: #4fc8e877;
+  letter-spacing: 1.5px;
+  text-align: center;
+  margin-top: 24px;
+  max-width: 480px;
+}
+.splash-choose-prompt {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.splash-welcome-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2.9rem;
+  color: #4fc8e8;
+  text-shadow: 0 0 30px #4fc8e866;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.splash-who-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: #7aaabb;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+.splash-cat-choice {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.splash-cat-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  background: none;
+  border: 1px solid #4fc8e833;
+  border-radius: 6px;
+  padding: 20px 20px 24px;
+  transition: all 0.2s;
+  width: min(280px, 40vw);
+}
+
+.splash-cat-option:hover {
+  border-color: #4fc8e8;
+  background: #4fc8e811;
+  transform: translateY(-6px);
+  box-shadow: 0 0 28px #4fc8e822;
+}
+
+.splash-cat-option .splash-cat {
+  height: 240px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.splash-cat-label {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 0.85rem;
+  color: #4fc8e8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.splash-cat-sublabel {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  color: #4fc8e877;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.splash-text {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  color: #c8e8f5;
+  letter-spacing: 1.5px;
+  line-height: 2;
+  text-align: center;
+}
+
+.splash-cursor {
+  display: inline-block;
+  color: #4fc8e8;
+  font-weight: bold;
+}
+
+.splash-cursor.blink {
+  animation: cursorBlink 0.8s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── INFO TIP ── */
+.break-info-tip {
+  display: inline-block;
+  position: relative;
+  margin-left: 8px;
+  color: #4fc8e888;
+  font-size: 0.8rem;
+  cursor: help;
+  font-family: sans-serif;
+}
+
+.break-info-tip:hover {
+  color: #4fc8e8;
+}
+
+.break-info-popup {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  background: #03050d;
+  border: 1px solid #4fc8e844;
+  padding: 10px 14px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: #c8e8f5;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+  text-align: center;
+  box-shadow: 0 4px 20px #000a, 0 0 14px #4fc8e811;
+  z-index: 50;
+  pointer-events: none;
+  white-space: normal;
+}
+
+.break-info-tip:hover .break-info-popup {
+  display: block;
+}
 .overlay-actions {
   display: flex;
   flex-direction: row;
