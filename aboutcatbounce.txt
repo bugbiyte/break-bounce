@@ -1,9 +1,0 @@
-A tiny desktop app that periodically hijacks the screen with bouncing creatures until the user takes a break.
-
-
-Core idea:
-* Every 45–60 minutes, the app appears on top of everything.
-* Cats/goblins/skulls/office gremlins bounce around the screen 
-* User cannot dismiss immediately.
-* It gives a silly command:“Stand up, mortal. Touch your toes for 30 seconds.”
-* After the timer ends, a button appears: “I have appeased the goblin.”

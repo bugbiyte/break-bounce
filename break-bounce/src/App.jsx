@@ -23,6 +23,22 @@ const THEMES = {
     name: "Cursed",
     creatures: ["🤡", "👁️ ", "🦷", "🧿", "🫁", "🩸", "🕯️ ", "🪦"],
   },
+  space: {
+    name: "Cosmic Void",
+    creatures: ["🚀", "👾", "🛸", "🌌", "🪐", "☄️", "👽", "🌠", "🔭", "🌑", "💫", "🛰️"],
+  },
+  ocean: {
+    name: "The Deep",
+    creatures: ["🦑", "🐙", "🦈", "🌊", "🐋", "🐠", "🦀", "🐚", "🪸", "🐡", "🦞", "🫧"],
+  },
+  dragons: {
+    name: "Dragon's Lair",
+    creatures: ["🐉", "🔥", "⚔️", "🛡️", "💎", "🏰", "🧙", "🌋", "🗡️", "🦎", "🪄", "🌪️"],
+  },
+  infernal: {
+    name: "The Infernal",
+    creatures: ["👹", "🔱", "🌋", "🩸", "🌑", "🕯️", "🦴", "🪦", "🌀", "⚡", "🔥", "👁️"],
+  },
 };
 const INTERVALS = [
   { label: "15 min", value: 15 * 60 * 1000 },
@@ -34,20 +50,9 @@ const INTERVALS = [
 
 const TALLY_GOAL = 5;
 
-function getDailyTheme() {
-  const today = new Date().toDateString();
-  const stored = localStorage.getItem("breakBounceTheme");
-  if (stored) {
-    const { date, key } = JSON.parse(stored);
-    if (date === today) return THEMES[key];
-  }
-  const keys = Object.keys(THEMES);
-  const key = keys[Math.floor(Math.random() * keys.length)];
-  localStorage.setItem(
-    "breakBounceTheme",
-    JSON.stringify({ date: today, key }),
-  );
-  return THEMES[key];
+function getSavedThemeKey() {
+  const saved = localStorage.getItem("breakBounceThemeKey");
+  return saved && THEMES[saved] ? saved : "cats";
 }
 
 function getSavedInterval() {
@@ -60,11 +65,39 @@ function getSavedTally() {
   return saved ? parseInt(saved) : 0;
 }
 
+function getSavedStreak() {
+  const saved = localStorage.getItem("breakBounceStreak");
+  return saved ? JSON.parse(saved) : { count: 0, lastCompleteDate: null };
+}
+
+function getSavedHistory() {
+  const saved = localStorage.getItem("breakBounceHistory");
+  return saved ? JSON.parse(saved) : [];
+}
+
+function computeNewStreak(current) {
+  const today = new Date().toDateString();
+  if (current.lastCompleteDate === today) return current;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const newCount = current.lastCompleteDate === yesterday.toDateString() ? current.count + 1 : 1;
+  return { count: newCount, lastCompleteDate: today };
+}
+
+function groupByDate(history) {
+  const map = {};
+  history.forEach((e) => {
+    if (!map[e.date]) map[e.date] = [];
+    map[e.date].push(e);
+  });
+  return Object.entries(map).map(([date, entries]) => ({ date, entries }));
+}
+
 const COMMANDS = [
   { title: "Stand up, mortal!", subtitle: "Touch your toes for 30 seconds." },
   {
     title: "The goblin demands movement.",
-    subtitle: "Do 10 jumping jacks. Now.",
+    subtitle: "Do 10 squats. Now.",
   },
   {
     title: "Your chair is a trap.",
@@ -76,11 +109,72 @@ const COMMANDS = [
   },
   {
     title: "The ancient law requires it.",
-    subtitle: "Roll your shoulders 5 times. Both directions.",
+    subtitle: "Stand up and roll your shoulders 5 times. Both directions.",
   },
   {
     title: "You have been sitting too long.",
     subtitle: "March in place for 30 seconds.",
+  },
+
+  {
+    title: "The goblin is watching.",
+    subtitle: "Stand up and spin in a slow circle.",
+  },
+  {
+    title: "Break the curse.",
+    subtitle: "Do 10 hamstring stretches on each leg. No excuses.",
+  },
+  {
+    title: "Your spine begs for mercy.",
+    subtitle: "Stretch side to side for 30 seconds.",
+  },
+  {
+    title: "Move, or else.",
+    subtitle: "Do 15 seconds of high knees.",
+  },
+  {
+    title: "The void grows impatient.",
+    subtitle: "Shake out your arms and legs.",
+  },
+  {
+    title: "You are becoming furniture.",
+    subtitle: "Stand up and walk around for 1 minute. Go. Go. Go.",
+  },
+  {
+    title: "Interrupting your stagnation.",
+    subtitle: "Touch your toes 5 times.",
+  },
+  {
+    title: "The goblin insists.",
+    subtitle: "Do 10 lunges (5 each leg).",
+  },
+  {
+    title: "Your body remembers movement.",
+    subtitle: "Reach for the ceiling and hold for 20 seconds.",
+  },
+  {
+    title: "Stillness is not an option.",
+    subtitle: "Jog in place for 30 seconds.",
+  },
+  {
+    title: "You’ve been claimed by the chair.",
+    subtitle: "Stand up and twist your torso left and right.",
+  },
+  {
+    title: "The ritual continues.",
+    subtitle: "Do 10 arm circles forward and backward.",
+  },
+  {
+    title: "The goblin grows restless.",
+    subtitle: "Pace around the room for 1 minute.",
+  },
+  {
+    title: "You cannot ignore this.",
+    subtitle: "Do 10 calf raises.",
+  },
+  {
+    title: "Freedom requires motion.",
+    subtitle: "Stretch your neck gently side to side.",
   },
 ];
 
@@ -112,6 +206,24 @@ function stopAlarm() {
     currentCtx.close();
     currentCtx = null;
   }
+}
+
+function playDismissSound() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = "sine";
+    const start = ctx.currentTime + i * 0.12;
+    gain.gain.setValueAtTime(0.25, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+    osc.start(start);
+    osc.stop(start + 0.5);
+  });
 }
 
 const RAIN = Array.from({ length: 60 }, (_, i) => ({
@@ -195,15 +307,15 @@ function Particles() {
   );
 }
 
-function Header({ tally, onSettings }) {
+function Header({ tally, onSettings, onHistory }) {
   return (
     <div className="header">
       <div className="header-title-wrap">
         <span className="header-title">⚔️ Break Bounce</span>
         <div className="header-about">
-          A web app that sounds an alarm and pulls you into a "Break Bounce"
-          session. <br /> Complete five sessions in a day, and the Goblin
-          finally leaves you alone—rewarding you with peace and a parting photo.
+          A web app that fires off an alarm and drags you into a "Break Bounce"
+          session. <br /> Survive five in a day and the Goblin (your alarm)
+          finally backs off—leaving you with silence and a farewell photo.
         </div>
       </div>
       <div className="tally-tab">
@@ -219,9 +331,10 @@ function Header({ tally, onSettings }) {
           {tally}/{TALLY_GOAL}
         </span>
       </div>
-      <button className="settings-btn" onClick={onSettings}>
-        🕰️
-      </button>
+      <div className="header-btns">
+        <button className="settings-btn" onClick={onHistory}>📜</button>
+        <button className="settings-btn" onClick={onSettings}>🕰️</button>
+      </div>
     </div>
   );
 }
@@ -439,13 +552,17 @@ function GigerBottom() {
 function App() {
   const [showOverlay, setShowOverlay] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [done, setDone] = useState(false);
   const [command, setCommand] = useState(COMMANDS[0]);
-  const [theme] = useState(() => getDailyTheme());
+  const [themeKey, setThemeKey] = useState(() => getSavedThemeKey());
+  const theme = THEMES[themeKey];
   const [interval, setIntervalValue] = useState(() => getSavedInterval());
   const [tally, setTally] = useState(() => getSavedTally());
+  const [streak, setStreak] = useState(() => getSavedStreak());
+  const [history, setHistory] = useState(() => getSavedHistory());
   const alarmRef = useRef(null);
   const overlayActiveRef = useRef(false);
   const breakTimerRef = useRef(null);
@@ -499,7 +616,24 @@ function App() {
   }
 
   function dismiss() {
+    playDismissSound();
     const newTally = tally + 1;
+
+    const entry = {
+      date: new Date().toDateString(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      title: command.title,
+    };
+    const newHistory = [entry, ...history].slice(0, 100);
+    setHistory(newHistory);
+    localStorage.setItem("breakBounceHistory", JSON.stringify(newHistory));
+
+    if (newTally >= TALLY_GOAL) {
+      const newStreak = computeNewStreak(streak);
+      setStreak(newStreak);
+      localStorage.setItem("breakBounceStreak", JSON.stringify(newStreak));
+    }
+
     setTally(newTally);
     localStorage.setItem("breakBounceTally", newTally);
     overlayActiveRef.current = false;
@@ -513,20 +647,24 @@ function App() {
     setShowSettings(false);
   }
 
+  function saveTheme(key) {
+    localStorage.setItem("breakBounceThemeKey", key);
+    setThemeKey(key);
+  }
+
   function resetTally() {
     setTally(0);
     localStorage.setItem("breakBounceTally", 0);
   }
 
   const REWARD_CATS = [
-    "/creatures/cat_1.png",
-    "/creatures/cat_2.png",
-    "/creatures/cat_3.png",
-    "/creatures/cat_4.png",
-    "/creatures/cat_5.png",
-    "/creatures/cat_6.png",
-    "/creatures/cat_7.png",
-    "/creatures/cat_8.jpg",
+    "/creatures/cat01.png",
+    "/creatures/cat02.png",
+    "/creatures/cat03.png",
+    "/creatures/cat04.png",
+    "/creatures/cat05.png",
+    "/creatures/cat06.png",
+    "/creatures/cat07.png",
   ];
   const [rewardCat] = useState(
     () => REWARD_CATS[Math.floor(Math.random() * REWARD_CATS.length)],
@@ -536,7 +674,9 @@ function App() {
     return (
       <div className="reward-screen">
         <GigerBottom />
-        <img src={rewardCat} className="reward-cat" alt="freed goblin" />
+        <div className="reward-cat-wrap">
+          <img src={rewardCat} className="reward-cat" alt="freed goblin" />
+        </div>
         <h1>🎉 The Goblin is Free!</h1>
         <p>
           You answered the call {TALLY_GOAL} times, mortal. The ancient debt is
@@ -553,7 +693,7 @@ function App() {
     return (
       <div className="settings-panel">
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(false)} />
+        <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} />
         <h2>⚙️ Settings</h2>
         <p>How often should the goblin appear?</p>
         <div className="interval-options">
@@ -574,18 +714,66 @@ function App() {
     );
   }
 
+  if (showHistory) {
+    const grouped = groupByDate(history);
+    return (
+      <div className="settings-panel">
+        <GigerBottom />
+        <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} />
+        <h2>📜 The Chronicle</h2>
+        {streak.count > 0 && (
+          <p className="streak-display">🔥 {streak.count} day streak</p>
+        )}
+        <div className="history-log">
+          {grouped.length === 0 ? (
+            <p className="history-empty">No sessions completed yet. The goblin waits.</p>
+          ) : (
+            grouped.map(({ date, entries }) => (
+              <div key={date} className="history-day">
+                <h3 className="history-date">{date}</h3>
+                {entries.map((e, i) => (
+                  <div key={i} className="history-entry">
+                    <span className="history-time">{e.time}</span>
+                    <span className="history-title">{e.title}</span>
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+        <button className="appease-btn" onClick={() => setShowHistory(false)}>← Back</button>
+      </div>
+    );
+  }
+
   if (!showOverlay) {
     return (
       <div className="waiting">
         <Particles />
         <GigerBottom />
-        <Header tally={tally} onSettings={() => setShowSettings(true)} />
+        <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} />
         <div className="zelda-box">
           <h2>Break Bounce</h2>
+          {streak.count > 0 && (
+            <p className="streak-display">🔥 {streak.count} day streak</p>
+          )}
           <div className="zelda-divider" />
-          <p>
-            Today's Theme: <strong>{theme.name}</strong>
-          </p>
+          <p>Choose your theme:</p>
+          <div className="theme-options">
+            {Object.entries(THEMES).map(([key, t]) => (
+              <button
+                key={key}
+                className={`theme-btn ${themeKey === key ? "active" : ""}`}
+                onClick={() => saveTheme(key)}
+              >
+                <span className="theme-btn-emojis">
+                  {t.creatures.slice(0, 3).join(" ")}
+                </span>
+                <span className="theme-btn-name">{t.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="zelda-divider" />
           <p>
             Break Every:{" "}
             <strong>
@@ -608,15 +796,22 @@ function App() {
       <Particles />
       <GigerBottom />
       <PhysicsCanvas creatures={theme.creatures} />
+      <p className="session-progress">🚩 Session {tally + 1} of {TALLY_GOAL} 🚩</p>
       <div className="content">
-        <h1 className="command">{command.title}</h1>
-        <p className="subtext">{command.subtitle}</p>
+        <div className="command-scroll">
+          <span className="scroll-corner-tl" />
+          <span className="scroll-corner-tr" />
+          <span className="scroll-corner-bl" />
+          <span className="scroll-corner-br" />
+          <h1 className="command">{command.title}</h1>
+          <p className="subtext">{command.subtitle}</p>
+        </div>
         {!accepted ? (
           <button className="appease-btn" onClick={accept}>
             Okay, I accept 🔔
           </button>
         ) : !done ? (
-          <div className="countdown">{secondsLeft}</div>
+          <div className={`countdown${secondsLeft <= 5 ? " critical" : secondsLeft <= 10 ? " low" : ""}`}>{secondsLeft}</div>
         ) : (
           <button className="appease-btn" onClick={dismiss}>
             I have appeased the goblin 👺

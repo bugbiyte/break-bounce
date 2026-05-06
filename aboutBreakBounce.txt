@@ -1,0 +1,11 @@
+A web app that sounds an alarm and pulls you into a "Break Bounce" session with bouncing creatures that prompts challenges driven by a goblin
+
+
+Core idea:
+* User sets timer for golbin creature to remind them for a 'break bounce' sessions
+* Cats/goblins/skulls/office gremlins bounce around the screen 
+* User cannot dismiss immediately.
+* It gives a silly command:“Stand up, mortal. Touch your toes for 30 seconds.”
+* After the timer ends, a button appears: “I have appeased the goblin.”
+
+BONUS: If user completes 5 Break Bounce Sessions, the goblin will grant you peace and reveal their face. 
