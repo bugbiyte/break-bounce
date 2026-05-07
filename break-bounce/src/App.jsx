@@ -89,7 +89,7 @@ function groupByDate(history) {
 }
 
 const COMMANDS = [
-  { title: "Stand up, mortal!", subtitle: "Touch your toes for 30 seconds." },
+  { title: "Stand up, mortal!", subtitle: "Touch your toes for 60 seconds." },
   {
     title: "The goblin demands movement.",
     subtitle: "Do 10 squats. Now.",
@@ -108,7 +108,7 @@ const COMMANDS = [
   },
   {
     title: "You have been sitting too long.",
-    subtitle: "March in place for 30 seconds.",
+    subtitle: "March in place for 60 seconds.",
   },
 
   {
@@ -121,7 +121,7 @@ const COMMANDS = [
   },
   {
     title: "Your spine begs for mercy.",
-    subtitle: "Stretch side to side for 30 seconds.",
+    subtitle: "Stretch side to side for 60 seconds.",
   },
   {
     title: "Move, or else.",
@@ -149,7 +149,7 @@ const COMMANDS = [
   },
   {
     title: "Stillness is not an option.",
-    subtitle: "Jog in place for 30 seconds.",
+    subtitle: "Jog in place for 60 seconds.",
   },
   {
     title: "You’ve been claimed by the chair.",
@@ -643,15 +643,14 @@ function SplashScreen({ onEnter }) {
               <button className="splash-cat-option" onClick={() => setChoice("new")}>
                 <img src="/creatures/cat04.png" className="splash-cat" alt="Fresh Prey" />
                 <span className="splash-cat-label">Fresh Prey</span>
-                <span className="splash-cat-sublabel">First time here</span>
+                <span className="splash-cat-sublabel splash-cat-sublabel--red">First time here</span>
               </button>
               <button className="splash-cat-option" onClick={() => setChoice("familiar")}>
                 <img src="/creatures/cat03.png" className="splash-cat" alt="Veteran of the Chair" />
                 <span className="splash-cat-label">Veteran of the Chair</span>
-                <span className="splash-cat-sublabel">I know the rules</span>
+                <span className="splash-cat-sublabel splash-cat-sublabel--red">I know the rules</span>
               </button>
             </div>
-            <p className="splash-tab-note">⚔️ Keep this tab open while you work — the goblin needs to watch you.</p>
           </>
         ) : choice === "new" ? (
           <>
@@ -669,7 +668,7 @@ function SplashScreen({ onEnter }) {
             {done && (
               <div className="splash-enter-wrap">
                 <button className="appease-btn" onClick={onEnter}>
-                  I accept the pact ⚔️
+                  I accept ⚔️
                 </button>
               </div>
             )}
@@ -709,6 +708,7 @@ function App() {
   const [streak, setStreak] = useState(() => getSavedStreak());
   const [history, setHistory] = useState(() => getSavedHistory());
   const [muted, setMuted] = useState(() => localStorage.getItem("breakBounceMuted") === "true");
+  const [intervalEverSet, setIntervalEverSet] = useState(() => !!localStorage.getItem("breakBounceInterval"));
   const [paused, setPaused] = useState(false);
   const mutedRef = useRef(muted);
   const alarmRef = useRef(null);
@@ -846,6 +846,7 @@ function App() {
   function saveInterval(ms) {
     localStorage.setItem("breakBounceInterval", ms);
     setIntervalValue(ms);
+    setIntervalEverSet(true);
     setShowSettings(false);
   }
 
@@ -967,7 +968,7 @@ function App() {
           </div>
           <div className="rules-item">
             <span className="rules-icon">⚔️</span>
-            <p>When summoned, accept the challenge and complete a 30-second movement break.</p>
+            <p>When summoned, accept the challenge and complete a 60-second movement break.</p>
           </div>
           <div className="rules-item">
             <span className="rules-icon">❤️</span>
@@ -994,13 +995,14 @@ function App() {
         <Particles />
         <GigerBottom />
         <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(true)} />
+        <p className="tab-reminder">⚔️ Keep this tab open while you work — the goblin needs to watch you.</p>
         <div className="zelda-box">
           <h2>Break Bounce</h2>
           {streak.count > 0 && (
             <p className="streak-display">🔥 {streak.count} day streak</p>
           )}
           <div className="zelda-divider" />
-          <p>Choose your theme{paused ? ":" : ":"}</p>
+          <p className="choose-theme-label">Choose your theme:</p>
           {paused && (
             <p className="resume-nudge">👺 The goblin waits. Select any theme to resume.</p>
           )}
@@ -1019,8 +1021,8 @@ function App() {
             ))}
           </div>
           <div className="zelda-divider" />
-          <p>
-            Break Every:{" "}
+          <p className={!intervalEverSet ? "set-time-label" : ""}>
+            {intervalEverSet ? "Break Every:" : "Set your Time:"}{" "}
             <strong>
               {INTERVALS.find((i) => i.value === interval)?.label}
             </strong>
@@ -1030,9 +1032,13 @@ function App() {
               </span>
           </p>
           <div className="zelda-divider" />
-          <p className="next-break-label">Goblin arrives in</p>
-          <p className="next-break-countdown">{formatTimeLeft(timeLeft)}</p>
-          <br />
+          {intervalEverSet && (
+            <>
+              <p className="next-break-label">Goblin arrives in</p>
+              <p className="next-break-countdown">{formatTimeLeft(timeLeft)}</p>
+              <br />
+            </>
+          )}
           <button className="appease-btn" onClick={triggerGoblin}>
             ⚔️ Summon the Goblin
           </button>

@@ -868,6 +868,34 @@ body {
   margin-top: 16px;
 }
 
+.set-time-label {
+  color: #cc2222;
+  letter-spacing: 2px;
+}
+
+.set-time-label strong {
+  color: #cc2222;
+}
+
+.choose-theme-label {
+  color: #cc2222 !important;
+  letter-spacing: 2px;
+}
+
+/* ── TAB REMINDER ── */
+.tab-reminder {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  color: #cc2222;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 8px 20px;
+  border: 1px solid #cc222233;
+  background: #cc222211;
+  max-width: 540px;
+  width: 90%;
+}
+
 /* ── NEXT BREAK COUNTDOWN ── */
 .next-break-label {
   font-family: 'Cinzel', serif;
@@ -1006,6 +1034,10 @@ body {
   color: #4fc8e877;
   letter-spacing: 1px;
   text-align: center;
+}
+
+.splash-cat-sublabel--red {
+  color: #cc2222;
 }
 
 .splash-text {
