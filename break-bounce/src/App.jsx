@@ -1002,6 +1002,7 @@ function App() {
             <p className="streak-display">🔥 {streak.count} day streak</p>
           )}
           <div className="zelda-divider" />
+          {!intervalEverSet && <p className="onboard-step">Step 1</p>}
           <p className="choose-theme-label">Choose your theme:</p>
           {paused && (
             <p className="resume-nudge">👺 The goblin waits. Select any theme to resume.</p>
@@ -1021,8 +1022,9 @@ function App() {
             ))}
           </div>
           <div className="zelda-divider" />
+          {!intervalEverSet && <p className="onboard-step">Step 2</p>}
           <p className={!intervalEverSet ? "set-time-label" : ""}>
-            {intervalEverSet ? "Break Every:" : "Set your Time:"}{" "}
+            {intervalEverSet ? "Break Every:" : "When shall I strike?"}{" "}
             <strong>
               {INTERVALS.find((i) => i.value === interval)?.label}
             </strong>
@@ -1039,9 +1041,17 @@ function App() {
               <br />
             </>
           )}
-          <button className="appease-btn" onClick={triggerGoblin}>
-            ⚔️ Summon the Goblin
-          </button>
+          {!intervalEverSet && <p className="onboard-step">Step 3</p>}
+          {!intervalEverSet ? (
+            <div className="summon-row">
+              <span className="summon-label">Summon the Goblin</span>
+              <button className="summon-emoji-btn" onClick={triggerGoblin}>⚔️</button>
+            </div>
+          ) : (
+            <button className="appease-btn" onClick={triggerGoblin}>
+              ⚔️ Summon the Goblin
+            </button>
+          )}
         </div>
         <Footer />
       </div>
