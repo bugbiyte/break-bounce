@@ -4,7 +4,7 @@ import "./App.css";
 
 const THEMES = {
   cats: {
-    name: "Creatures of the purr",
+    name: "Shadow Paws",
     creatures: ["🐱", "🐈", "🐈‍⬛", "🙀", "𓃭", "🐾", "🐆", "𓃮", "🐆", "𓃠"],
   },
   cursed: {
@@ -37,6 +37,24 @@ const INTERVALS = [
 ];
 
 const TALLY_GOAL = 5;
+
+const THEME_COLORS = {
+  cats:     '#4fc8e8',
+  cursed:   '#9b1fcc',
+  space:    '#7c6ae8',
+  ocean:    '#2ab5c0',
+  dragons:  '#e87c2a',
+  infernal: '#cc2222',
+};
+
+const THEME_CATS = {
+  cats:     { img: '/creatures/cat04.png', anim: 'cat-anim--squat' },
+  cursed:   { img: '/creatures/cat07.png', anim: 'cat-anim--sway' },
+  space:    { img: '/creatures/cat02.png', anim: 'cat-anim--float' },
+  ocean:    { img: '/creatures/cat05.png', anim: 'cat-anim--swim' },
+  dragons:  { img: '/creatures/cat01.png', anim: 'cat-anim--strike' },
+  infernal: { img: '/creatures/cat06.png', anim: 'cat-anim--pulse' },
+};
 
 function getSavedThemeKey() {
   const saved = localStorage.getItem("breakBounceThemeKey");
@@ -187,6 +205,22 @@ const SHAME_MESSAGES = [
 ];
 
 let currentCtx = null;
+
+function playDungeonPing(muted) {
+  if (muted) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(180, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 1.2);
+  gain.gain.setValueAtTime(0.35, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.4);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 1.4);
+}
 
 async function playAlarm(muted) {
   if (muted) return;
@@ -346,211 +380,142 @@ function Header({ tally, onSettings, onHistory, muted, onMute, onLogoClick, onRu
   );
 }
 
-function GigerBottom() {
+function BrokenChairs() {
   return (
-    <div className="giger-bottom">
-      <svg
-        viewBox="0 0 1440 220"
-        preserveAspectRatio="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+    <div className="broken-chairs">
+      <svg viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <radialGradient id="gg" cx="50%" cy="100%" r="70%">
-            <stop offset="0%" stopColor="#4fc8e8" stopOpacity="0.12" />
+          <radialGradient id="bcGlow" cx="50%" cy="100%" r="70%">
+            <stop offset="0%" stopColor="#4fc8e8" stopOpacity="0.10" />
             <stop offset="100%" stopColor="#4fc8e8" stopOpacity="0" />
           </radialGradient>
-          <filter id="eglow">
+          <filter id="bcMetal">
+            <feGaussianBlur stdDeviation="1.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <filter id="bcCrack">
             <feGaussianBlur stdDeviation="2" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
         </defs>
 
-        {/* ambient bottom glow */}
-        <rect x="0" y="0" width="1440" height="220" fill="url(#gg)" />
+        <rect x="0" y="0" width="1440" height="220" fill="url(#bcGlow)" />
 
         {/* layer 1 — far background terrain */}
-        <path
-          fill="#040810"
-          d="M0,220 L0,148 Q80,130 160,148 Q240,166 320,142 Q400,118 480,140 Q560,162 640,138 Q720,114 800,138 Q880,162 960,138 Q1040,114 1120,138 Q1200,162 1280,142 Q1360,122 1440,142 L1440,220 Z"
-        />
+        <path fill="#040810"
+          d="M0,220 L0,148 Q80,130 160,148 Q240,166 320,142 Q400,118 480,140 Q560,162 640,138 Q720,114 800,138 Q880,162 960,138 Q1040,114 1120,138 Q1200,162 1280,142 Q1360,122 1440,142 L1440,220 Z" />
 
-        {/* background vertebrae towers */}
-        {[120, 340, 560, 780, 1000, 1220, 1400].map((x, i) => (
-          <g key={i}>
-            {[0, 1, 2, 3, 4, 5].map((j) => (
-              <ellipse
-                key={j}
-                cx={x}
-                cy={138 + j * 13}
-                rx={13 - j}
-                ry={4.5}
-                fill="#06101e"
-                stroke="#1a4a6a"
-                strokeWidth="0.4"
-              />
-            ))}
-            <line
-              x1={x}
-              y1={138}
-              x2={x}
-              y2={220}
-              stroke="#020408"
-              strokeWidth="4"
-            />
-          </g>
-        ))}
+        {/* background chairs — buried, only tops visible */}
+        <g transform="translate(120, 142) rotate(-20)">
+          <rect x="-6" y="-48" width="13" height="30" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
+          <line x1="2" y1="-46" x2="-3" y2="-24" stroke="#cc2222" strokeWidth="0.7" strokeOpacity="0.55" filter="url(#bcCrack)" />
+          <rect x="-15" y="-18" width="30" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+        </g>
+        <g transform="translate(560, 140) rotate(82)">
+          <rect x="-5" y="-46" width="12" height="30" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.35" />
+          <rect x="-14" y="-16" width="28" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+          <rect x="-2.5" y="-7" width="5" height="12" fill="#040810" stroke="#1a4a6a" strokeWidth="0.4" />
+        </g>
+        <g transform="translate(1050, 138) rotate(15)">
+          <rect x="-6" y="-50" width="13" height="32" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
+          <rect x="-15" y="-18" width="30" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+          <line x1="-15" y1="-14" x2="-5" y2="-18" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.6" filter="url(#bcCrack)" />
+        </g>
 
         {/* layer 2 — mid ground */}
-        <path
-          fill="#060c17"
-          d="M0,220 L0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168 L1440,220 Z"
-        />
+        <path fill="#060c17"
+          d="M0,220 L0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168 L1440,220 Z" />
+        <path fill="none" stroke="#4fc8e8" strokeWidth="1" strokeOpacity="0.18"
+          d="M0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168" />
 
-        {/* cyan horizon glow line */}
-        <path
-          fill="none"
-          stroke="#4fc8e8"
-          strokeWidth="1"
-          strokeOpacity="0.2"
-          d="M0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168"
-        />
-
-        {/* skull faces embedded in mid layer */}
-        {[300, 720, 1140].map((x, i) => (
-          <g key={i}>
-            <ellipse
-              cx={x}
-              cy={162}
-              rx={28}
-              ry={20}
-              fill="#070e1c"
-              stroke="#4fc8e8"
-              strokeWidth="0.7"
-              strokeOpacity="0.35"
-            />
-            <ellipse cx={x - 9} cy={161} rx={7} ry={6} fill="#020407" />
-            <ellipse cx={x + 9} cy={161} rx={7} ry={6} fill="#020407" />
-            <ellipse
-              cx={x - 9}
-              cy={161}
-              rx={3}
-              ry={2.5}
-              fill="#4fc8e8"
-              fillOpacity="0.22"
-              filter="url(#eglow)"
-            />
-            <ellipse
-              cx={x + 9}
-              cy={161}
-              rx={3}
-              ry={2.5}
-              fill="#4fc8e8"
-              fillOpacity="0.22"
-              filter="url(#eglow)"
-            />
-            <path
-              d={`M${x - 15},173 Q${x},179 ${x + 15},173`}
-              fill="none"
-              stroke="#4fc8e8"
-              strokeWidth="0.6"
-              strokeOpacity="0.3"
-            />
-            {[-6, -2, 2, 6].map((dx, j) => (
-              <rect
-                key={j}
-                x={x + dx - 1.5}
-                y={173}
-                width={3}
-                height={6}
-                rx={1}
-                fill="#030508"
-              />
-            ))}
-          </g>
-        ))}
+        {/* mid-ground chairs */}
+        <g transform="translate(250, 168) rotate(-28)">
+          <rect x="-6" y="-45" width="13" height="28" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.45" />
+          <line x1="-4" y1="-43" x2="3" y2="-22" stroke="#cc2222" strokeWidth="0.9" strokeOpacity="0.65" filter="url(#bcCrack)" />
+          <rect x="-16" y="-17" width="32" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+          <rect x="-2.5" y="-8" width="5" height="10" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
+        </g>
+        <g transform="translate(720, 162) rotate(8)">
+          <rect x="-6" y="-50" width="13" height="32" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" filter="url(#bcMetal)" />
+          <line x1="1" y1="-48" x2="-4" y2="-28" stroke="#cc2222" strokeWidth="1" strokeOpacity="0.7" filter="url(#bcCrack)" />
+          <line x1="-6" y1="-30" x2="-20" y2="-38" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.6" />
+          <line x1="7" y1="-30" x2="20" y2="-35" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.5" />
+          <rect x="-17" y="-18" width="34" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
+          <rect x="-3" y="-9" width="6" height="12" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
+          <line x1="-15" y1="3" x2="15" y2="3" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.5" />
+        </g>
+        <g transform="translate(1180, 166) rotate(-82)">
+          <rect x="-6" y="-48" width="13" height="30" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.4" />
+          <rect x="-16" y="-18" width="32" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
+          <rect x="-3" y="-9" width="6" height="12" fill="#050918" />
+          <line x1="-14" y1="4" x2="14" y2="4" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.4" />
+          <circle cx="-14" cy="6" r="2.5" fill="#040a14" stroke="#1a4a6a" strokeWidth="0.4" />
+          <circle cx="14" cy="6" r="2.5" fill="#040a14" stroke="#1a4a6a" strokeWidth="0.4" />
+        </g>
 
         {/* layer 3 — foreground (darkest) */}
-        <path
-          fill="#020407"
-          d="M0,220 L0,198 Q72,192 144,200 Q216,208 288,196 Q360,184 432,196 Q504,208 576,196 Q648,184 720,196 Q792,208 864,196 Q936,184 1008,196 Q1080,208 1152,196 Q1224,184 1296,196 Q1368,208 1440,196 L1440,220 Z"
-        />
+        <path fill="#020407"
+          d="M0,220 L0,198 Q72,192 144,200 Q216,208 288,196 Q360,184 432,196 Q504,208 576,196 Q648,184 720,196 Q792,208 864,196 Q936,184 1008,196 Q1080,208 1152,196 Q1224,184 1296,196 Q1368,208 1440,196 L1440,220 Z" />
 
-        {/* foreground vertebrae — most prominent, glowing caps */}
-        {[60, 200, 380, 540, 700, 860, 1020, 1200, 1380].map((x, i) => (
-          <g key={i}>
-            {[0, 1, 2, 3].map((j) => (
-              <g key={j}>
-                <ellipse
-                  cx={x}
-                  cy={192 + j * 8}
-                  rx={18 - j * 1.5}
-                  ry={5.5}
-                  fill="#030608"
-                />
-                <ellipse
-                  cx={x}
-                  cy={192 + j * 8}
-                  rx={13 - j}
-                  ry={3.5}
-                  fill="#060e1c"
-                  stroke="#4fc8e8"
-                  strokeWidth="0.5"
-                  strokeOpacity="0.55"
-                />
-                <ellipse
-                  cx={x}
-                  cy={192 + j * 8}
-                  rx={5}
-                  ry={1.5}
-                  fill="#4fc8e8"
-                  fillOpacity="0.07"
-                />
-              </g>
-            ))}
-            <rect
-              x={x - 2}
-              y={192}
-              width={4}
-              height={28}
-              fill="#010203"
-              rx={1}
-            />
-            <ellipse
-              cx={x}
-              cy={192}
-              rx={7}
-              ry={2.5}
-              fill="#4fc8e8"
-              fillOpacity="0.2"
-              filter="url(#eglow)"
-            />
+        {/* foreground chairs — most prominent */}
+        <g transform="translate(80, 196) rotate(88)">
+          <rect x="-6" y="-52" width="14" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" filter="url(#bcMetal)" />
+          <line x1="2" y1="-50" x2="-5" y2="-28" stroke="#cc2222" strokeWidth="1.2" strokeOpacity="0.75" filter="url(#bcCrack)" />
+          <rect x="-18" y="-18" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
+          <rect x="-3" y="-7" width="6" height="14" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
+          <line x1="-18" y1="7" x2="18" y2="7" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
+          <circle cx="-18" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+          <circle cx="18" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+          <circle cx="0" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
+        </g>
+        <g transform="translate(400, 193) rotate(-32)">
+          <rect x="-6" y="-55" width="13" height="22" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcMetal)" />
+          <g transform="rotate(-20, 0, -26)">
+            <rect x="-5" y="-34" width="12" height="16" rx="1" fill="#06091a" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.7" filter="url(#bcCrack)" />
           </g>
-        ))}
+          <rect x="-18" y="-20" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
+          <line x1="-18" y1="-20" x2="-24" y2="-36" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.6" />
+          <rect x="-3.5" y="-9" width="7" height="14" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
+          <line x1="-18" y1="5" x2="18" y2="5" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
+          <circle cx="-18" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.45" />
+          <circle cx="18" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.45" />
+          <circle cx="0" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+        </g>
+        <g transform="translate(780, 190) rotate(5)">
+          <rect x="-7" y="-58" width="15" height="38" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="1" strokeOpacity="0.6" filter="url(#bcMetal)" />
+          <line x1="3" y1="-56" x2="-6" y2="-28" stroke="#cc2222" strokeWidth="1.5" strokeOpacity="0.8" filter="url(#bcCrack)" />
+          <line x1="-5" y1="-40" x2="2" y2="-32" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcCrack)" />
+          <line x1="-7" y1="-35" x2="-22" y2="-42" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.7" />
+          <line x1="8" y1="-35" x2="22" y2="-40" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.6" />
+          <rect x="-20" y="-22" width="40" height="12" rx="2.5" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" />
+          <rect x="-4" y="-10" width="8" height="16" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
+          <line x1="-22" y1="6" x2="22" y2="6" stroke="#1a4a6a" strokeWidth="2.5" strokeOpacity="0.6" />
+          <line x1="-15" y1="2" x2="-15" y2="8" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
+          <line x1="15" y1="2" x2="15" y2="8" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
+          <circle cx="-22" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.5" />
+          <circle cx="22" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.5" />
+          <circle cx="0" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.45" />
+        </g>
+        <g transform="translate(1100, 195) rotate(-88)">
+          <rect x="-6" y="-52" width="14" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcMetal)" />
+          <rect x="-18" y="-18" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.45" />
+          <rect x="-3" y="-7" width="6" height="14" fill="#050918" />
+          <line x1="-18" y1="7" x2="18" y2="7" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.45" />
+          <circle cx="-18" cy="9.5" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+          <circle cx="18" cy="9.5" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+        </g>
+        <g transform="translate(1380, 194) rotate(-22)">
+          <rect x="-6" y="-55" width="13" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" filter="url(#bcMetal)" />
+          <line x1="-4" y1="-53" x2="4" y2="-28" stroke="#cc2222" strokeWidth="1" strokeOpacity="0.65" filter="url(#bcCrack)" />
+          <rect x="-18" y="-21" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
+          <rect x="-3.5" y="-10" width="7" height="13" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
+          <line x1="-18" y1="3" x2="18" y2="3" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.45" />
+          <circle cx="-18" cy="6" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+          <circle cx="18" cy="6" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+        </g>
 
-        {/* biomechanical pipe running across base */}
-        <rect x="0" y="211" width="1440" height="5" fill="#040910" />
-        <rect
-          x="0"
-          y="212"
-          width="1440"
-          height="1.5"
-          fill="#4fc8e8"
-          fillOpacity="0.12"
-        />
-        {Array.from({ length: 19 }, (_, i) => (
-          <rect
-            key={i}
-            x={i * 80 - 4}
-            y={208}
-            width={8}
-            height={11}
-            fill="#060c18"
-            rx={1.5}
-          />
-        ))}
+        <rect x="0" y="214" width="1440" height="6" fill="#040910" />
+        <rect x="0" y="215" width="1440" height="1.5" fill="#4fc8e8" fillOpacity="0.10" />
       </svg>
     </div>
   );
@@ -558,10 +523,61 @@ function GigerBottom() {
 
 const SPLASH_TEXT = "Pssst. Yeah, you. The one glued to the chair. I am Break Bounce. A sassy goblin who will remind you to take breaks. Complete 5 sessions and I shall leave you in peace...for today.";
 
-let _splashSeen = false;
+function getSavedHasVisited() {
+  return !!localStorage.getItem('breakBounceHasVisited');
+}
+
+const SPLASH_FLOATERS = ["👹","💀","👻","🔥","🐱","🌌","🦑","🐉","🕯️","👁️","⚡","🪦","🎃","🦷","🧿","🩸","🔮","🌑","🕸️","☠️"];
+
+const INVADERS = [
+  { emoji: "👾", top: "8%",  delay: 0,    speed: 7  },
+  { emoji: "👾", top: "8%",  delay: 0.6,  speed: 7  },
+  { emoji: "👾", top: "8%",  delay: 1.2,  speed: 7  },
+  { emoji: "👾", top: "8%",  delay: 1.8,  speed: 7  },
+  { emoji: "👾", top: "8%",  delay: 2.4,  speed: 7  },
+  { emoji: "💀", top: "20%", delay: 1.0,  speed: 10 },
+  { emoji: "💀", top: "20%", delay: 1.7,  speed: 10 },
+  { emoji: "💀", top: "20%", delay: 2.4,  speed: 10 },
+  { emoji: "💀", top: "20%", delay: 3.1,  speed: 10 },
+  { emoji: "🦇", top: "35%", delay: 0.3,  speed: 5  },
+  { emoji: "🦇", top: "35%", delay: 1.1,  speed: 5  },
+  { emoji: "🦇", top: "35%", delay: 1.9,  speed: 5  },
+  { emoji: "🦇", top: "35%", delay: 2.7,  speed: 5  },
+  { emoji: "🦇", top: "35%", delay: 3.5,  speed: 5  },
+  { emoji: "🕯️", top: "52%", delay: 2.0,  speed: 13 },
+  { emoji: "🕯️", top: "52%", delay: 2.9,  speed: 13 },
+  { emoji: "🕯️", top: "52%", delay: 3.8,  speed: 13 },
+  { emoji: "⚔️",  top: "67%", delay: 0.8,  speed: 8  },
+  { emoji: "⚔️",  top: "67%", delay: 1.6,  speed: 8  },
+  { emoji: "⚔️",  top: "67%", delay: 2.4,  speed: 8  },
+  { emoji: "⚔️",  top: "67%", delay: 3.2,  speed: 8  },
+  { emoji: "👁️",  top: "80%", delay: 1.5,  speed: 9  },
+  { emoji: "👁️",  top: "80%", delay: 2.3,  speed: 9  },
+  { emoji: "👁️",  top: "80%", delay: 3.1,  speed: 9  },
+];
+
+const STARS = Array.from({ length: 28 }, (_, i) => ({
+  id: i,
+  top: `${(i * 3.7 + 1) % 100}%`,
+  duration: `${0.3 + (i % 5) * 0.22}s`,
+  delay: `${(i * 0.55) % 5}s`,
+  width: `${12 + (i % 4) * 20}px`,
+  opacity: 0.2 + (i % 4) * 0.12,
+  color: i % 3 === 0 ? '#9b59b6' : i % 3 === 1 ? '#4fc8e8' : '#cc2222',
+}));
+
+const MIST_BLOBS = Array.from({ length: 6 }, (_, i) => ({
+  id: i,
+  left: `${(i * 22 + 5) % 90}%`,
+  top: `${(i * 19 + 10) % 80}%`,
+  size: `${180 + (i % 3) * 80}px`,
+  duration: `${10 + i * 3}s`,
+  delay: `${i * 1.8}s`,
+  color: i % 3 === 0 ? 'rgba(79,200,232,0.06)' : i % 3 === 1 ? 'rgba(123,47,168,0.07)' : 'rgba(204,34,34,0.05)',
+}));
 
 function SplashScreen({ onEnter }) {
-  const [choice, setChoice] = useState(null); // null | "new" | "familiar"
+  const [choice, setChoice] = useState(null);
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
   const canvasRef = useRef(null);
@@ -618,34 +634,90 @@ function SplashScreen({ onEnter }) {
         }
       }
     }
-    for (let i = 0; i < 12; i++) {
+    const glowColors = ["#4fc8e814", "#7b2fa810", "#cc222208"];
+    for (let i = 0; i < 16; i++) {
       const x = Math.random() * canvas.width;
       const y = Math.random() * canvas.height;
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, 60);
-      grad.addColorStop(0, "#4fc8e814");
+      const color = glowColors[i % glowColors.length];
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, 80);
+      grad.addColorStop(0, color);
       grad.addColorStop(1, "transparent");
       ctx.fillStyle = grad;
-      ctx.fillRect(x - 60, y - 60, 120, 120);
+      ctx.fillRect(x - 80, y - 80, 160, 160);
     }
   }, []);
 
   return (
     <div className="splash-screen">
       <canvas ref={canvasRef} className="splash-canvas" />
+
+      <div className="splash-bg-layer" aria-hidden="true">
+        {MIST_BLOBS.map((b) => (
+          <div key={b.id} className="splash-mist-blob" style={{
+            left: b.left, top: b.top,
+            width: b.size, height: b.size,
+            background: b.color,
+            animationDuration: b.duration,
+            animationDelay: b.delay,
+          }} />
+        ))}
+      </div>
+
+      <div className="splash-bg-layer" aria-hidden="true">
+        {STARS.map((s) => (
+          <div key={s.id} className="splash-star-streak" style={{
+            top: s.top, width: s.width, opacity: s.opacity,
+            background: `linear-gradient(to right, transparent, ${s.color}, transparent)`,
+            animationDuration: s.duration,
+            animationDelay: s.delay,
+          }} />
+        ))}
+      </div>
+
+      <div className="splash-bg-layer" aria-hidden="true">
+        {INVADERS.map((inv, i) => (
+          <span key={i} className="splash-invader" style={{
+            top: inv.top,
+            animationDuration: `${inv.speed}s`,
+            animationDelay: `${inv.delay}s`,
+          }}>
+            {inv.emoji}
+          </span>
+        ))}
+      </div>
+
+      <div className="splash-floats" aria-hidden="true">
+        {SPLASH_FLOATERS.map((e, i) => (
+          <span key={i} className="splash-float-creature" style={{
+            left: `${(i * 23 + 7) % 90}%`,
+            top: `${(i * 17 + 5) % 85}%`,
+            animationDelay: `${((i * 0.35) % 3).toFixed(2)}s`,
+            animationDuration: `${(2.5 + (i % 5) * 0.6).toFixed(1)}s`,
+            fontSize: `${(1 + (i % 3) * 0.35).toFixed(2)}rem`,
+            opacity: 0.15 + (i % 4) * 0.06,
+          }}>
+            {e}
+          </span>
+        ))}
+      </div>
+
+      <div className="splash-scanlines" aria-hidden="true" />
+      <div className="splash-vignette" aria-hidden="true" />
+
       <div className="splash-content">
         {choice === null ? (
           <>
-            <div className="splash-choose-prompt">
+            <div className="splash-title-block">
               <p className="splash-welcome-title">Welcome to Break Bounce</p>
               <p className="splash-who-title">Who Approaches?</p>
             </div>
             <div className="splash-cat-choice">
-              <button className="splash-cat-option" onClick={() => setChoice("new")}>
+              <button className="splash-cat-option" onMouseEnter={() => playDungeonPing(false)} onClick={() => setChoice("new")}>
                 <img src="/creatures/cat04.png" className="splash-cat" alt="Fresh Prey" />
                 <span className="splash-cat-label">Fresh Prey</span>
                 <span className="splash-cat-sublabel splash-cat-sublabel--red">First time here</span>
               </button>
-              <button className="splash-cat-option" onClick={() => setChoice("familiar")}>
+              <button className="splash-cat-option" onMouseEnter={() => playDungeonPing(false)} onClick={() => setChoice("familiar")}>
                 <img src="/creatures/cat03.png" className="splash-cat" alt="Veteran of the Chair" />
                 <span className="splash-cat-label">Veteran of the Chair</span>
                 <span className="splash-cat-sublabel splash-cat-sublabel--red">I know the rules</span>
@@ -667,8 +739,8 @@ function SplashScreen({ onEnter }) {
             </div>
             {done && (
               <div className="splash-enter-wrap">
-                <button className="appease-btn" onClick={onEnter}>
-                  I accept ⚔️
+                <button className="splash-enter-btn" onClick={onEnter}>
+                  ⚔️ &nbsp;Enter the Arena&nbsp; ⚔️
                 </button>
               </div>
             )}
@@ -689,7 +761,7 @@ function Footer() {
 
 
 function App() {
-  const [showSplash, setShowSplash] = useState(!_splashSeen);
+  const [showSplash, setShowSplash] = useState(!getSavedHasVisited());
 
   const [showRules, setShowRules] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
@@ -710,6 +782,7 @@ function App() {
   const [muted, setMuted] = useState(() => localStorage.getItem("breakBounceMuted") === "true");
   const [intervalEverSet, setIntervalEverSet] = useState(() => !!localStorage.getItem("breakBounceInterval"));
   const [paused, setPaused] = useState(false);
+  const [overlayPhase, setOverlayPhase] = useState('intro');
   const mutedRef = useRef(muted);
   const alarmRef = useRef(null);
   const overlayActiveRef = useRef(false);
@@ -745,6 +818,7 @@ function App() {
     setSecondsLeft(60);
     setDone(false);
     setAccepted(false);
+    setOverlayPhase('intro');
     setShowOverlay(true);
   }
 
@@ -781,6 +855,12 @@ function App() {
       stopAlarm();
     };
   }, [showOverlay]);
+
+  useEffect(() => {
+    if (!showOverlay || overlayPhase !== 'intro') return;
+    const timer = setTimeout(() => setOverlayPhase('command'), 5000);
+    return () => clearTimeout(timer);
+  }, [showOverlay, overlayPhase]);
 
   useEffect(() => {
     if (!accepted) return;
@@ -865,12 +945,12 @@ function App() {
   }
 
   function goToSplash() {
-    _splashSeen = false;
+    localStorage.removeItem('breakBounceHasVisited');
     setShowSplash(true);
   }
 
   function enterApp() {
-    _splashSeen = true;
+    localStorage.setItem('breakBounceHasVisited', 'true');
     setShowSplash(false);
   }
 
@@ -879,7 +959,7 @@ function App() {
   if (tally >= TALLY_GOAL) {
     return (
       <div className="reward-screen">
-        <GigerBottom />
+        <BrokenChairs />
         <div className="reward-cat-wrap">
           <img src={rewardCat} className="reward-cat" alt="freed goblin" />
         </div>
@@ -899,7 +979,7 @@ function App() {
   if (showSettings) {
     return (
       <div className="settings-panel">
-        <GigerBottom />
+        <BrokenChairs />
         <Header tally={tally} onSettings={() => setShowSettings(false)} onHistory={() => { setShowSettings(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => { setShowSettings(false); setShowRules(true); }} />
         <h2>⚙️ Settings</h2>
         <p>How often should the goblin appear?</p>
@@ -926,7 +1006,7 @@ function App() {
     const grouped = groupByDate(history);
     return (
       <div className="settings-panel">
-        <GigerBottom />
+        <BrokenChairs />
         <Header tally={tally} onSettings={() => { setShowHistory(false); setShowSettings(true); }} onHistory={() => setShowHistory(false)} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => { setShowHistory(false); setShowRules(true); }} />
         <h2>📜 The Chronicle</h2>
         {streak.count > 0 && (
@@ -958,7 +1038,7 @@ function App() {
   if (showRules) {
     return (
       <div className="settings-panel">
-        <GigerBottom />
+        <BrokenChairs />
         <Header tally={tally} onSettings={() => { setShowRules(false); setShowSettings(true); }} onHistory={() => { setShowRules(false); setShowHistory(true); }} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(false)} />
         <h2>📖 The Rules</h2>
         <div className="rules-list">
@@ -993,7 +1073,7 @@ function App() {
     return (
       <div className="waiting">
         <Particles />
-        <GigerBottom />
+        <BrokenChairs />
         <Header tally={tally} onSettings={() => setShowSettings(true)} onHistory={() => setShowHistory(true)} muted={muted} onMute={toggleMute} onLogoClick={goToSplash} onRules={() => setShowRules(true)} />
         <p className="tab-reminder">⚔️ Keep this tab open while you work — the goblin needs to watch you.</p>
         <div className="zelda-box">
@@ -1011,13 +1091,18 @@ function App() {
             {Object.entries(THEMES).map(([key, t]) => (
               <button
                 key={key}
-                className={`theme-btn ${themeKey === key ? "active" : ""}`}
+                className={`theme-card ${themeKey === key ? "active" : ""}`}
+                style={{ '--accent': THEME_COLORS[key] }}
                 onClick={() => saveTheme(key)}
               >
-                <span className="theme-btn-emojis">
-                  {t.creatures.slice(0, 3).join(" ")}
-                </span>
-                <span className="theme-btn-name">{t.name}</span>
+                <div className="theme-card__preview">
+                  <img
+                    src={THEME_CATS[key].img}
+                    className={`theme-card__cat ${THEME_CATS[key].anim}`}
+                    alt={t.name}
+                  />
+                </div>
+                <span className="theme-card__name">{t.name}</span>
               </button>
             ))}
           </div>
@@ -1059,55 +1144,68 @@ function App() {
   }
 
   return (
-    <div className={`overlay${shamed ? " shame-overlay" : ""}`}>
+    <div className={`overlay${shamed ? " shame-overlay" : ""}`} data-theme={themeKey} style={{ '--accent': THEME_COLORS[themeKey] }}>
       <Particles />
-      <GigerBottom />
-      <PhysicsCanvas creatures={theme.creatures} />
+      <BrokenChairs />
       {!shamed && <p className="session-progress">🚩 Session {tally + 1} of {TALLY_GOAL} 🚩</p>}
-      <div className="content">
-        {shamed ? (
-          <>
-            <div className="command-scroll shame-scroll">
-              <span className="scroll-corner-tl" />
-              <span className="scroll-corner-tr" />
-              <span className="scroll-corner-bl" />
-              <span className="scroll-corner-br" />
-              <h1 className="command shame-command">{shameMsg.title}</h1>
-              <p className="subtext">{shameMsg.subtitle}</p>
-            </div>
-            <button className="appease-btn shame-btn" onClick={dismissShame}>
-              I accept my shame 🙇
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="command-scroll">
-              <span className="scroll-corner-tl" />
-              <span className="scroll-corner-tr" />
-              <span className="scroll-corner-bl" />
-              <span className="scroll-corner-br" />
-              <h1 className="command">{command.title}</h1>
-              <p className="subtext">{command.subtitle}</p>
-            </div>
-            {!accepted ? (
-              <div className="overlay-actions">
-                <button className="appease-btn" onClick={accept}>
-                  Okay, I accept 🔔
-                </button>
-                <button className="skip-btn" onClick={skip}>
-                  I cannot accept 🏳️
-                </button>
+      <button className="overlay-mute-btn" onClick={toggleMute} title={muted ? "Unmute" : "Mute"}>
+        {muted ? "🔇" : "🔊"}
+      </button>
+      {!shamed && overlayPhase === 'intro' ? (
+        <div className="overlay-intro">
+          <img
+            src={THEME_CATS[themeKey].img}
+            className="overlay-intro-cat"
+            alt="goblin warming up"
+          />
+          <p className="overlay-intro-label">The goblin stirs…</p>
+        </div>
+      ) : (
+        <div className={`content${!shamed && overlayPhase === 'command' ? ' content--slide-in' : ''}`}>
+          {shamed ? (
+            <>
+              <div className="command-scroll shame-scroll">
+                <span className="scroll-corner-tl" />
+                <span className="scroll-corner-tr" />
+                <span className="scroll-corner-bl" />
+                <span className="scroll-corner-br" />
+                <h1 className="command shame-command">{shameMsg.title}</h1>
+                <p className="subtext">{shameMsg.subtitle}</p>
               </div>
-            ) : !done ? (
-              <div className={`countdown${secondsLeft <= 5 ? " critical" : secondsLeft <= 10 ? " low" : ""}`}>{secondsLeft}</div>
-            ) : (
-              <button className="appease-btn" onClick={dismiss}>
-                I have appeased the goblin 👺
+              <button className="appease-btn shame-btn" onClick={dismissShame}>
+                I accept my shame 🙇
               </button>
-            )}
-          </>
-        )}
-      </div>
+            </>
+          ) : (
+            <>
+              <div className="command-scroll">
+                <span className="scroll-corner-tl" />
+                <span className="scroll-corner-tr" />
+                <span className="scroll-corner-bl" />
+                <span className="scroll-corner-br" />
+                <h1 className="command">{command.title}</h1>
+                <p className="subtext">{command.subtitle}</p>
+              </div>
+              {!accepted ? (
+                <div className="overlay-actions">
+                  <button className="appease-btn" onClick={accept}>
+                    Okay, I accept 🔔
+                  </button>
+                  <button className="skip-btn" onClick={skip}>
+                    I cannot accept 🏳️
+                  </button>
+                </div>
+              ) : !done ? (
+                <div className={`countdown${secondsLeft <= 5 ? " critical" : secondsLeft <= 10 ? " low" : ""}`}>{secondsLeft}</div>
+              ) : (
+                <button className="appease-btn" onClick={dismiss}>
+                  I have appeased the goblin 👺
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
