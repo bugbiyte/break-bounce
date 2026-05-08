@@ -299,6 +299,64 @@ const MIST = Array.from({ length: 8 }, (_, i) => ({
   size: `${80 + Math.random() * 120}px`,
 }));
 
+const CHAIR_RAIN = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  left: `${(i * 6.8 + (i % 3) * 4.2) % 100}%`,
+  duration: `${4.5 + (i % 6) * 0.85}s`,
+  delay: `${(i * 1.1) % 8}s`,
+  size: 30 + (i % 5) * 7,
+  rotStart: -40 + (i % 9) * 10,
+  rotEnd: 200 + (i % 4) * 90,
+  opacity: 0.07 + (i % 5) * 0.04,
+}));
+
+function ChairRain() {
+  return (
+    <div className="chair-rain" aria-hidden="true">
+      {CHAIR_RAIN.map((c) => (
+        <div
+          key={c.id}
+          className="chair-rain-item"
+          style={{
+            left: c.left,
+            width: `${c.size}px`,
+            height: `${c.size * 1.45}px`,
+            animationDuration: c.duration,
+            animationDelay: c.delay,
+            '--chair-rot-start': `${c.rotStart}deg`,
+            '--chair-rot-end': `${c.rotEnd}deg`,
+            '--chair-op': c.opacity,
+          }}
+        >
+          <svg viewBox="0 0 46 64" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            {/* backrest */}
+            <rect x="15" y="0" width="14" height="33" rx="3" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1.3" />
+            {/* crack */}
+            <line x1="23" y1="2" x2="17" y2="22" style={{ stroke: '#cc2222' }} strokeWidth="1.2" opacity="0.85" />
+            {/* seat */}
+            <rect x="4" y="31" width="38" height="11" rx="2.5" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1.3" />
+            {/* armrests */}
+            <rect x="0" y="22" width="5" height="11" rx="1.5" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.9" />
+            <rect x="41" y="22" width="5" height="11" rx="1.5" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.9" />
+            {/* gas lift */}
+            <rect x="20" y="42" width="6" height="11" rx="1.5" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.9" />
+            {/* 5-arm star base */}
+            <line x1="23" y1="53" x2="1" y2="61" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1.3" strokeLinecap="round" />
+            <line x1="23" y1="53" x2="45" y2="61" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1.3" strokeLinecap="round" />
+            <line x1="23" y1="53" x2="23" y2="64" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1.3" strokeLinecap="round" />
+            <line x1="23" y1="53" x2="8" y2="52" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1" strokeLinecap="round" />
+            <line x1="23" y1="53" x2="38" y2="52" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="1" strokeLinecap="round" />
+            {/* casters */}
+            <ellipse cx="1" cy="62" rx="3" ry="2" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.8" />
+            <ellipse cx="45" cy="62" rx="3" ry="2" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.8" />
+            <ellipse cx="23" cy="64" rx="3" ry="2" fill="none" style={{ stroke: 'var(--accent, #4fc8e8)' }} strokeWidth="0.8" />
+          </svg>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Particles() {
   return (
     <>
@@ -386,135 +444,179 @@ function BrokenChairs() {
       <svg viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="bcGlow" cx="50%" cy="100%" r="70%">
-            <stop offset="0%" stopColor="#4fc8e8" stopOpacity="0.10" />
+            <stop offset="0%" stopColor="#4fc8e8" stopOpacity="0.08" />
             <stop offset="100%" stopColor="#4fc8e8" stopOpacity="0" />
           </radialGradient>
           <filter id="bcMetal">
-            <feGaussianBlur stdDeviation="1.5" result="b" />
+            <feGaussianBlur stdDeviation="1.2" result="b" />
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
           <filter id="bcCrack">
             <feGaussianBlur stdDeviation="2" result="b" />
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
+          <linearGradient id="fogGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#4fc8e8" stopOpacity="0" />
+            <stop offset="100%" stopColor="#4fc8e8" stopOpacity="0.04" />
+          </linearGradient>
         </defs>
 
         <rect x="0" y="0" width="1440" height="220" fill="url(#bcGlow)" />
 
-        {/* layer 1 — far background terrain */}
+        {/* ── LAYER 1  far background terrain ── */}
         <path fill="#040810"
           d="M0,220 L0,148 Q80,130 160,148 Q240,166 320,142 Q400,118 480,140 Q560,162 640,138 Q720,114 800,138 Q880,162 960,138 Q1040,114 1120,138 Q1200,162 1280,142 Q1360,122 1440,142 L1440,220 Z" />
 
-        {/* background chairs — buried, only tops visible */}
-        <g transform="translate(120, 142) rotate(-20)">
-          <rect x="-6" y="-48" width="13" height="30" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
-          <line x1="2" y1="-46" x2="-3" y2="-24" stroke="#cc2222" strokeWidth="0.7" strokeOpacity="0.55" filter="url(#bcCrack)" />
-          <rect x="-15" y="-18" width="30" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
-        </g>
-        <g transform="translate(560, 140) rotate(82)">
-          <rect x="-5" y="-46" width="12" height="30" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.35" />
-          <rect x="-14" y="-16" width="28" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
-          <rect x="-2.5" y="-7" width="5" height="12" fill="#040810" stroke="#1a4a6a" strokeWidth="0.4" />
-        </g>
-        <g transform="translate(1050, 138) rotate(15)">
-          <rect x="-6" y="-50" width="13" height="32" rx="1.5" fill="#050918" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
-          <rect x="-15" y="-18" width="30" height="9" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
-          <line x1="-15" y1="-14" x2="-5" y2="-18" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.6" filter="url(#bcCrack)" />
-        </g>
+        {/* ── BACKGROUND ROW — tiny tombstone chairs, buried deep, only arched tops peek out ── */}
+        {[
+          { x:  90, rot: -10 }, { x: 285, rot:   6 }, { x: 490, rot: -14 },
+          { x: 700, rot:   9 }, { x: 910, rot:  -7 }, { x: 1120, rot: 13 },
+          { x: 1340, rot:  -9 },
+        ].map(({ x, rot }, i) => (
+          <g key={i} transform={`translate(${x}, 150) rotate(${rot})`}>
+            <path d={`M-5,0 L-5,-28 Q-5,-35,0,-35 Q5,-35,5,-28 L5,0 Z`}
+              fill="#040c1a" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.35" />
+            {i % 2 === 0 && (
+              <line x1="-1" y1="-33" x2="3" y2="-16" stroke="#cc2222" strokeWidth="0.6" strokeOpacity="0.45" filter="url(#bcCrack)" />
+            )}
+          </g>
+        ))}
 
-        {/* layer 2 — mid ground */}
+        {/* ── LAYER 2  mid ground ── */}
         <path fill="#060c17"
           d="M0,220 L0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168 L1440,220 Z" />
-        <path fill="none" stroke="#4fc8e8" strokeWidth="1" strokeOpacity="0.18"
+        <path fill="none" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.14"
           d="M0,168 Q72,158 144,170 Q216,182 288,168 Q360,154 432,168 Q504,182 576,168 Q648,154 720,168 Q792,182 864,168 Q936,154 1008,168 Q1080,182 1152,168 Q1224,154 1296,168 Q1368,182 1440,168" />
 
-        {/* mid-ground chairs */}
-        <g transform="translate(250, 168) rotate(-28)">
-          <rect x="-6" y="-45" width="13" height="28" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.45" />
-          <line x1="-4" y1="-43" x2="3" y2="-22" stroke="#cc2222" strokeWidth="0.9" strokeOpacity="0.65" filter="url(#bcCrack)" />
-          <rect x="-16" y="-17" width="32" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-          <rect x="-2.5" y="-8" width="5" height="10" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
+        {/* ── MID ROW — medium tombstone chairs, seat lip just at ground level ── */}
+        {/* chair 7: left, leaning */}
+        <g transform="translate(220, 170) rotate(-17)">
+          <path d="M-7,0 L-7,-46 Q-7,-56,0,-56 Q7,-56,7,-46 L7,0 Z"
+            fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.85" strokeOpacity="0.5" filter="url(#bcMetal)" />
+          <line x1="-2" y1="-54" x2="5" y2="-28" stroke="#cc2222" strokeWidth="1.1" strokeOpacity="0.7" filter="url(#bcCrack)" />
+          <rect x="-16" y="1" width="32" height="5" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+          <line x1="-5" y1="0" x2="-5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
+          <line x1=" 5" y1="0" x2=" 5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
         </g>
-        <g transform="translate(720, 162) rotate(8)">
-          <rect x="-6" y="-50" width="13" height="32" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" filter="url(#bcMetal)" />
-          <line x1="1" y1="-48" x2="-4" y2="-28" stroke="#cc2222" strokeWidth="1" strokeOpacity="0.7" filter="url(#bcCrack)" />
-          <line x1="-6" y1="-30" x2="-20" y2="-38" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.6" />
-          <line x1="7" y1="-30" x2="20" y2="-35" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.5" />
-          <rect x="-17" y="-18" width="34" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
-          <rect x="-3" y="-9" width="6" height="12" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
-          <line x1="-15" y1="3" x2="15" y2="3" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.5" />
+        {/* chair 8: right of center */}
+        <g transform="translate(500, 163) rotate(8)">
+          <path d="M-7,0 L-7,-50 Q-7,-60,0,-60 Q7,-60,7,-50 L7,0 Z"
+            fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.9" strokeOpacity="0.55" filter="url(#bcMetal)" />
+          <line x1="3" y1="-58" x2="-5" y2="-30" stroke="#cc2222" strokeWidth="1.2" strokeOpacity="0.75" filter="url(#bcCrack)" />
+          <rect x="-16" y="1" width="32" height="5" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+          <line x1="-5" y1="0" x2="-5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
+          <line x1=" 5" y1="0" x2=" 5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
         </g>
-        <g transform="translate(1180, 166) rotate(-82)">
-          <rect x="-6" y="-48" width="13" height="30" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.4" />
-          <rect x="-16" y="-18" width="32" height="9" rx="2" fill="#070d1e" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
-          <rect x="-3" y="-9" width="6" height="12" fill="#050918" />
-          <line x1="-14" y1="4" x2="14" y2="4" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.4" />
-          <circle cx="-14" cy="6" r="2.5" fill="#040a14" stroke="#1a4a6a" strokeWidth="0.4" />
-          <circle cx="14" cy="6" r="2.5" fill="#040a14" stroke="#1a4a6a" strokeWidth="0.4" />
+        {/* chair 9: toppled — lying on ground */}
+        <g transform="translate(730, 162) rotate(82)">
+          <path d="M-6,0 L-6,-46 Q-6,-55,0,-55 Q6,-55,6,-46 L6,0 Z"
+            fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.4" />
+          <rect x="-16" y="1" width="32" height="5" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.25" />
+          <line x1="-14" y1="7" x2="14" y2="7" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.4" strokeLinecap="round" />
+          <ellipse cx="-14" cy="9" rx="3.5" ry="2" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
+          <ellipse cx=" 14" cy="9" rx="3.5" ry="2" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
+        </g>
+        {/* chair 10: far right */}
+        <g transform="translate(980, 165) rotate(-11)">
+          <path d="M-7,0 L-7,-50 Q-7,-60,0,-60 Q7,-60,7,-50 L7,0 Z"
+            fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.9" strokeOpacity="0.5" filter="url(#bcMetal)" />
+          <line x1="-3" y1="-58" x2="5" y2="-30" stroke="#cc2222" strokeWidth="1" strokeOpacity="0.65" filter="url(#bcCrack)" />
+          <rect x="-16" y="1" width="32" height="5" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.3" />
+          <line x1="-5" y1="0" x2="-5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
+          <line x1=" 5" y1="0" x2=" 5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.4" />
+        </g>
+        {/* chair 11: right side */}
+        <g transform="translate(1250, 162) rotate(14)">
+          <path d="M-7,0 L-7,-46 Q-7,-56,0,-56 Q7,-56,7,-46 L7,0 Z"
+            fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.85" strokeOpacity="0.48" />
+          <rect x="-16" y="1" width="32" height="5" rx="1.5" fill="#060b1c" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.28" />
+          <line x1="-5" y1="0" x2="-5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.35" />
+          <line x1=" 5" y1="0" x2=" 5" y2="9" stroke="#1a4a6a" strokeWidth="1.2" strokeOpacity="0.35" />
         </g>
 
-        {/* layer 3 — foreground (darkest) */}
+        {/* ── LAYER 3  foreground (darkest) ── */}
         <path fill="#020407"
           d="M0,220 L0,198 Q72,192 144,200 Q216,208 288,196 Q360,184 432,196 Q504,208 576,196 Q648,184 720,196 Q792,208 864,196 Q936,184 1008,196 Q1080,208 1152,196 Q1224,184 1296,196 Q1368,208 1440,196 L1440,220 Z" />
 
-        {/* foreground chairs — most prominent */}
-        <g transform="translate(80, 196) rotate(88)">
-          <rect x="-6" y="-52" width="14" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" filter="url(#bcMetal)" />
-          <line x1="2" y1="-50" x2="-5" y2="-28" stroke="#cc2222" strokeWidth="1.2" strokeOpacity="0.75" filter="url(#bcCrack)" />
-          <rect x="-18" y="-18" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
-          <rect x="-3" y="-7" width="6" height="14" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
-          <line x1="-18" y1="7" x2="18" y2="7" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
-          <circle cx="-18" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-          <circle cx="18" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-          <circle cx="0" cy="9" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.35" />
-        </g>
-        <g transform="translate(400, 193) rotate(-32)">
-          <rect x="-6" y="-55" width="13" height="22" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcMetal)" />
-          <g transform="rotate(-20, 0, -26)">
-            <rect x="-5" y="-34" width="12" height="16" rx="1" fill="#06091a" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.7" filter="url(#bcCrack)" />
-          </g>
-          <rect x="-18" y="-20" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
-          <line x1="-18" y1="-20" x2="-24" y2="-36" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.6" />
-          <rect x="-3.5" y="-9" width="7" height="14" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
-          <line x1="-18" y1="5" x2="18" y2="5" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
-          <circle cx="-18" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.45" />
-          <circle cx="18" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.45" />
-          <circle cx="0" cy="8" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-        </g>
-        <g transform="translate(780, 190) rotate(5)">
-          <rect x="-7" y="-58" width="15" height="38" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="1" strokeOpacity="0.6" filter="url(#bcMetal)" />
-          <line x1="3" y1="-56" x2="-6" y2="-28" stroke="#cc2222" strokeWidth="1.5" strokeOpacity="0.8" filter="url(#bcCrack)" />
-          <line x1="-5" y1="-40" x2="2" y2="-32" stroke="#cc2222" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcCrack)" />
-          <line x1="-7" y1="-35" x2="-22" y2="-42" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.7" />
-          <line x1="8" y1="-35" x2="22" y2="-40" stroke="#1a4a6a" strokeWidth="1.5" strokeOpacity="0.6" />
-          <rect x="-20" y="-22" width="40" height="12" rx="2.5" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" />
-          <rect x="-4" y="-10" width="8" height="16" fill="#050918" stroke="#1a4a6a" strokeWidth="0.5" />
-          <line x1="-22" y1="6" x2="22" y2="6" stroke="#1a4a6a" strokeWidth="2.5" strokeOpacity="0.6" />
-          <line x1="-15" y1="2" x2="-15" y2="8" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
-          <line x1="15" y1="2" x2="15" y2="8" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" />
-          <circle cx="-22" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.5" />
-          <circle cx="22" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.5" />
-          <circle cx="0" cy="9" r="3.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.45" />
-        </g>
-        <g transform="translate(1100, 195) rotate(-88)">
-          <rect x="-6" y="-52" width="14" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.5" filter="url(#bcMetal)" />
-          <rect x="-18" y="-18" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.45" />
-          <rect x="-3" y="-7" width="6" height="14" fill="#050918" />
-          <line x1="-18" y1="7" x2="18" y2="7" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.45" />
-          <circle cx="-18" cy="9.5" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-          <circle cx="18" cy="9.5" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-        </g>
-        <g transform="translate(1380, 194) rotate(-22)">
-          <rect x="-6" y="-55" width="13" height="34" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.55" filter="url(#bcMetal)" />
-          <line x1="-4" y1="-53" x2="4" y2="-28" stroke="#cc2222" strokeWidth="1" strokeOpacity="0.65" filter="url(#bcCrack)" />
-          <rect x="-18" y="-21" width="36" height="11" rx="2" fill="#070c1e" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.5" />
-          <rect x="-3.5" y="-10" width="7" height="13" fill="#050918" stroke="#1a4a6a" strokeWidth="0.4" />
-          <line x1="-18" y1="3" x2="18" y2="3" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.45" />
-          <circle cx="-18" cy="6" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
-          <circle cx="18" cy="6" r="3" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.5" strokeOpacity="0.4" />
+        {/* ── FOREGROUND ROW — largest tombstone chairs, full graveyard drama ── */}
+
+        {/* moonlight halo behind each upright chair */}
+        <ellipse cx="105"  cy="196" rx="28" ry="18" fill="#4fc8e8" fillOpacity="0.05" />
+        <ellipse cx="480"  cy="194" rx="34" ry="20" fill="#4fc8e8" fillOpacity="0.05" />
+        <ellipse cx="740"  cy="190" rx="45" ry="26" fill="#4fc8e8" fillOpacity="0.07" />
+        <ellipse cx="1050" cy="193" rx="34" ry="20" fill="#4fc8e8" fillOpacity="0.05" />
+        <ellipse cx="1370" cy="195" rx="28" ry="18" fill="#4fc8e8" fillOpacity="0.05" />
+
+        {/* chair 12: far left, leaning */}
+        <g transform="translate(105, 200) rotate(-18)">
+          <path d="M-9,0 L-9,-62 Q-9,-74,0,-74 Q9,-74,9,-62 L9,0 Z"
+            fill="#06091a" stroke="#4fc8e8" strokeWidth="1.1" strokeOpacity="0.62" filter="url(#bcMetal)" />
+          <line x1="-3" y1="-72" x2="7" y2="-40" stroke="#cc2222" strokeWidth="1.6" strokeOpacity="0.9" filter="url(#bcCrack)" />
+          <line x1="-6" y1="-54" x2="4" y2="-42" stroke="#cc2222" strokeWidth="0.7" strokeOpacity="0.5" filter="url(#bcCrack)" />
+          {/* seat lip at ground */}
+          <rect x="-22" y="1" width="44" height="7" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.42" />
+          {/* armrest nubs */}
+          <rect x="-27" y="-9" width="6" height="11" rx="1.5" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.6" />
+          <rect x=" 21" y="-9" width="6" height="11" rx="1.5" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.6" />
+          {/* support posts into ground */}
+          <line x1="-5" y1="0" x2="-5" y2="12" stroke="#1a4a6a" strokeWidth="1.8" strokeOpacity="0.5" />
+          <line x1=" 5" y1="0" x2=" 5" y2="12" stroke="#1a4a6a" strokeWidth="1.8" strokeOpacity="0.5" />
         </g>
 
-        <rect x="0" y="214" width="1440" height="6" fill="#040910" />
+        {/* chair 13: fallen — toppled flat on ground */}
+        <g transform="translate(335, 197) rotate(86)">
+          <path d="M-8,0 L-8,-62 Q-8,-72,0,-72 Q8,-72,8,-62 L8,0 Z"
+            fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.9" strokeOpacity="0.48" />
+          <rect x="-20" y="1" width="40" height="7" rx="2" fill="#06091a" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.38" />
+          <line x1="-22" y1="9" x2="22" y2="9" stroke="#1a4a6a" strokeWidth="2" strokeOpacity="0.5" strokeLinecap="round" />
+          <ellipse cx="-22" cy="12" rx="4.5" ry="2.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.45" />
+          <ellipse cx="  0" cy="12" rx="4.5" ry="2.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.4" />
+          <ellipse cx=" 22" cy="12" rx="4.5" ry="2.5" fill="#040a14" stroke="#4fc8e8" strokeWidth="0.6" strokeOpacity="0.45" />
+        </g>
+
+        {/* chair 14: center — the monument, tallest, most cracked */}
+        <g transform="translate(740, 196) rotate(-3)">
+          <path d="M-11,0 L-11,-78 Q-11,-92,0,-92 Q11,-92,11,-78 L11,0 Z"
+            fill="#06091a" stroke="#4fc8e8" strokeWidth="1.35" strokeOpacity="0.72" filter="url(#bcMetal)" />
+          <line x1="-4" y1="-90" x2="9" y2="-50" stroke="#cc2222" strokeWidth="2.2" strokeOpacity="0.95" filter="url(#bcCrack)" />
+          <line x1="-8" y1="-68" x2="6" y2="-54" stroke="#cc2222" strokeWidth="1"  strokeOpacity="0.6"  filter="url(#bcCrack)" />
+          {/* seat lip */}
+          <rect x="-26" y="1" width="52" height="8" rx="2.5" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.9" strokeOpacity="0.52" />
+          {/* armrest nubs */}
+          <rect x="-32" y="-12" width="7" height="14" rx="2" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.7" />
+          <rect x=" 25" y="-12" width="7" height="14" rx="2" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.7" />
+          {/* support posts */}
+          <line x1="-6" y1="0" x2="-6" y2="14" stroke="#1a4a6a" strokeWidth="2.2" strokeOpacity="0.55" />
+          <line x1=" 6" y1="0" x2=" 6" y2="14" stroke="#1a4a6a" strokeWidth="2.2" strokeOpacity="0.55" />
+        </g>
+
+        {/* chair 15: leaning right */}
+        <g transform="translate(1050, 198) rotate(20)">
+          <path d="M-9,0 L-9,-66 Q-9,-77,0,-77 Q9,-77,9,-66 L9,0 Z"
+            fill="#06091a" stroke="#4fc8e8" strokeWidth="1.1" strokeOpacity="0.6" filter="url(#bcMetal)" />
+          <line x1="5" y1="-75" x2="-7" y2="-42" stroke="#cc2222" strokeWidth="1.7" strokeOpacity="0.85" filter="url(#bcCrack)" />
+          <rect x="-22" y="1" width="44" height="7" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.8" strokeOpacity="0.45" />
+          <rect x="-28" y="-10" width="6" height="12" rx="1.5" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.65" />
+          <rect x=" 22" y="-10" width="6" height="12" rx="1.5" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.65" />
+          <line x1="-5" y1="0" x2="-5" y2="12" stroke="#1a4a6a" strokeWidth="1.8" strokeOpacity="0.5" />
+          <line x1=" 5" y1="0" x2=" 5" y2="12" stroke="#1a4a6a" strokeWidth="1.8" strokeOpacity="0.5" />
+        </g>
+
+        {/* chair 16: far right edge */}
+        <g transform="translate(1370, 200) rotate(-13)">
+          <path d="M-8,0 L-8,-60 Q-8,-70,0,-70 Q8,-70,8,-60 L8,0 Z"
+            fill="#06091a" stroke="#4fc8e8" strokeWidth="1" strokeOpacity="0.56" filter="url(#bcMetal)" />
+          <line x1="-2" y1="-68" x2="6" y2="-38" stroke="#cc2222" strokeWidth="1.4" strokeOpacity="0.75" filter="url(#bcCrack)" />
+          <rect x="-20" y="1" width="40" height="7" rx="2" fill="#060b1a" stroke="#4fc8e8" strokeWidth="0.7" strokeOpacity="0.4" />
+          <rect x="-26" y="-9" width="6" height="11" rx="1.5" fill="#060b18" stroke="#1a4a6a" strokeWidth="0.6" />
+          <line x1="-5" y1="0" x2="-5" y2="11" stroke="#1a4a6a" strokeWidth="1.6" strokeOpacity="0.45" />
+          <line x1=" 5" y1="0" x2=" 5" y2="11" stroke="#1a4a6a" strokeWidth="1.6" strokeOpacity="0.45" />
+        </g>
+
+        {/* ground fog at terrain edge */}
+        <rect x="0" y="190" width="1440" height="30" fill="url(#fogGrad)" />
+
+        <rect x="0" y="214" width="1440" height="6"   fill="#040910" />
         <rect x="0" y="215" width="1440" height="1.5" fill="#4fc8e8" fillOpacity="0.10" />
       </svg>
     </div>
@@ -1146,6 +1248,7 @@ function App() {
   return (
     <div className={`overlay${shamed ? " shame-overlay" : ""}`} data-theme={themeKey} style={{ '--accent': THEME_COLORS[themeKey] }}>
       <Particles />
+      <ChairRain />
       <BrokenChairs />
       {!shamed && <p className="session-progress">🚩 Session {tally + 1} of {TALLY_GOAL} 🚩</p>}
       <button className="overlay-mute-btn" onClick={toggleMute} title={muted ? "Unmute" : "Mute"}>

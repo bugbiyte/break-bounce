@@ -1445,7 +1445,30 @@ body {
   height: 220px;
 }
 
-/* ── OVERLAY INTRO PHASE ── */
+/* ── CHAIR RAIN ── */
+.chair-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.chair-rain-item {
+  position: absolute;
+  top: -120px;
+  animation: chairFall linear infinite;
+  will-change: transform;
+}
+
+@keyframes chairFall {
+  0%   { transform: translateY(0)     rotate(var(--chair-rot-start)); opacity: 0; }
+  6%   { opacity: var(--chair-op); }
+  88%  { opacity: var(--chair-op); }
+  100% { transform: translateY(115vh) rotate(var(--chair-rot-end));   opacity: 0; }
+}
+
+
 .overlay-intro {
   position: absolute;
   inset: 0;
